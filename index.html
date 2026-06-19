@@ -727,11 +727,11 @@ tr.total-row td{font-weight:600;background:var(--surface2);border-top:2px solid 
               <h3 style="margin-bottom:14px">Parâmetros comerciais</h3>
               <div class="form-row cols2">
                 <div class="form-group"><label>Tipo de imposto</label><select id="tipo-imp"><option>Tipo 1 (ISS 3,4%)</option><option>Tipo 2 (ISS 5%)</option></select></div>
-                <div class="form-group"><label>Comissão (%)</label><input type="number" id="comissao" value="0" onchange="calcPreco()"></div>
+                <div class="form-group"><label>Comissão (%)</label><input type="number" id="comissao" oninput="calcPreco()" value="0" onchange="calcPreco()"></div>
               </div>
               <div class="form-row cols2">
-                <div class="form-group"><label>Margem desejada (%)</label><input type="number" id="margem" value="10" onchange="calcPreco()"></div>
-                <div class="form-group"><label>Prazo contratual (meses)</label><input type="number" id="prazo" value="24" onchange="calcPreco()"></div>
+                <div class="form-group"><label>Margem desejada (%)</label><input type="number" id="margem" oninput="calcPreco()" value="10" onchange="calcPreco()"></div>
+                <div class="form-group"><label>Prazo contratual (meses)</label><input type="number" id="prazo" oninput="calcPreco()" value="24" onchange="calcPreco()"></div>
               </div>
               <div class="form-row cols2">
                 <div class="form-group"><label>Dias faturamento/mês</label><input type="number" value="21"></div>
@@ -741,12 +741,12 @@ tr.total-row td{font-weight:600;background:var(--surface2);border-top:2px solid 
             <div class="card">
               <h3 style="margin-bottom:14px">Impostos sobre preço</h3>
               <div class="form-row cols2">
-                <div class="form-group"><label>ISS (%)</label><input type="number" id="iss" value="3.4" onchange="calcPreco()"></div>
-                <div class="form-group"><label>PIS (%)</label><input type="number" id="pis" value="0.65" onchange="calcPreco()"></div>
+                <div class="form-group"><label>ISS (%)</label><input type="number" id="iss" oninput="calcPreco()" value="3.4" onchange="calcPreco()"></div>
+                <div class="form-group"><label>PIS (%)</label><input type="number" id="pis" oninput="calcPreco()" value="0.65" onchange="calcPreco()"></div>
               </div>
               <div class="form-row cols2">
-                <div class="form-group"><label>COFINS (%)</label><input type="number" id="cofins" value="3.0" onchange="calcPreco()"></div>
-                <div class="form-group"><label>CPRB (%)</label><input type="number" id="cprb" value="3.0" onchange="calcPreco()"></div>
+                <div class="form-group"><label>COFINS (%)</label><input type="number" id="cofins" oninput="calcPreco()" value="3.0" onchange="calcPreco()"></div>
+                <div class="form-group"><label>CPRB (%)</label><input type="number" id="cprb" oninput="calcPreco()" value="3.0" onchange="calcPreco()"></div>
               </div>
             </div>
           </div>
@@ -786,7 +786,7 @@ tr.total-row td{font-weight:600;background:var(--surface2);border-top:2px solid 
             </div>
             <div style="display:flex;gap:8px;margin-top:14px">
               <button class="btn btn-primary" style="flex:1"><i class="ti ti-send"></i> Enviar para aprovação</button>
-              <button class="btn"><i class="ti ti-download"></i> Exportar PDF</button>
+              <button class="btn" onclick="exportarPDF()"><i class="ti ti-download"></i> Exportar PDF</button>
             </div>
           </div>
         </div>
@@ -1094,10 +1094,18 @@ function fmt(v) {
 }
 
 function calcEquipe() {
+  // Parâmetros vivos do tab Benefícios
   const encargos = 0.697003;
-  const vt = 770;
-  const vr = 770;
-  const saude = 406.21;
+  const diasUteis = parseFloat(document.querySelector('#tab-beneficios input[type=number]')?.value) || 22;
+  const vtDia     = parseFloat(document.querySelectorAll('#tab-beneficios input[type=number]')[1]?.value) || 35;
+  const vtDescPct = (parseFloat(document.querySelectorAll('#tab-beneficios input[type=number]')[2]?.value) || 6) / 100;
+  const vrDia     = parseFloat(document.getElementById('vr8')?.value) || 35;
+  const saude     = parseFloat(document.querySelectorAll('#tab-beneficios input[type=number]')[6]?.value) || 385;
+  const odonto    = parseFloat(document.querySelectorAll('#tab-beneficios input[type=number]')[7]?.value) || 21.21;
+
+  const vtBruto   = vtDia * diasUteis;
+  const vrBruto   = vrDia * diasUteis;
+  const saudeTot  = saude + odonto;
   let totQtde = 0, totMensal = 0;
   document.querySelectorAll('#equipe-body tr').forEach(tr => {
     const inputs = tr.querySelectorAll('input[type=number]');
@@ -1105,8 +1113,10 @@ function calcEquipe() {
     const qtde = parseFloat(inputs[0].value) || 0;
     const salario = parseFloat(inputs[1].value) || 0;
     const id = tr.dataset.id;
-    const custoBase = salario * (1 + encargos);
-    const custoTotal = custoBase + vt + vr + saude;
+    const descontoVT = Math.min(salario * vtDescPct, vtBruto);
+    const vtLiquido  = vtBruto - descontoVT;
+    const custoBase  = salario * (1 + encargos);
+    const custoTotal = custoBase + vtLiquido + vrBruto + saudeTot;
     const fk = salario > 0 ? (custoTotal / salario).toFixed(3) : '—';
     const cuUnit = custoTotal;
     const ctTotal = cuUnit * qtde;
@@ -1118,9 +1128,86 @@ function calcEquipe() {
   });
   document.getElementById('tot-qtde').innerHTML = '<strong>' + totQtde + '</strong>';
   document.getElementById('tot-mensal').innerHTML = '<strong>' + fmt(totMensal) + '</strong>';
+  // Recalcular preço automaticamente
+  setTimeout(calcPreco, 50);
 }
 
-function calcPreco() {}
+function calcPreco() {
+  // Ler parâmetros da tela
+  const iss    = (parseFloat(document.getElementById('iss')?.value)    || 3.4)   / 100;
+  const pis    = (parseFloat(document.getElementById('pis')?.value)    || 0.65)  / 100;
+  const cofins = (parseFloat(document.getElementById('cofins')?.value) || 3.0)   / 100;
+  const comiss = (parseFloat(document.getElementById('comissao')?.value)|| 0)    / 100;
+  const margem = (parseFloat(document.getElementById('margem')?.value) || 10)    / 100;
+  const prazo  =  parseInt(document.getElementById('prazo')?.value)    || 24;
+
+  // Custo base (equipe + investimento + despesas)
+  const custoEquipe = parseFloat(document.getElementById('tot-mensal')
+    ?.textContent?.replace(/[^0-9,.]/g,'').replace('.','').replace(',','.')) || 563448.51;
+  const custoInvest  = 676.87;
+  const custoDespesa = 500.00;
+  const custoTotal   = custoEquipe + custoInvest + custoDespesa;
+
+  // Total impostos sobre preço (método: impostos / preço = alíquota)
+  const totalImpostos = iss + pis + cofins;
+
+  // Markup: preço = custo / (1 - impostos - comissão - margem)
+  const divisor = 1 - totalImpostos - comiss - margem;
+  if (divisor <= 0) return;
+
+  const precoMinimo     = custoTotal / (1 - totalImpostos - comiss - 0.05); // margem mínima 5%
+  const precoRecomendado = custoTotal / divisor;
+  const precoMes        = precoRecomendado;
+  const precoContrato   = precoMes * prazo;
+
+  const valorImpostos   = precoMes * totalImpostos;
+  const valorMargem     = precoMes * margem;
+  const valorComissao   = precoMes * comiss;
+
+  const fmtBR = v => 'R$ ' + v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const pctBR = v => (v*100).toFixed(2).replace('.',',') + '%';
+
+  // Atualizar memória de cálculo
+  const mc = document.getElementById('memoria-calc');
+  if (mc) {
+    mc.innerHTML = `
+      <div class="calc-row"><span class="calc-label">Custo pessoal/mês</span><span class="calc-val">${fmtBR(custoEquipe)}</span></div>
+      <div class="calc-row"><span class="calc-label">Investimentos/mês</span><span class="calc-val">${fmtBR(custoInvest)}</span></div>
+      <div class="calc-row"><span class="calc-label">Despesas mensais</span><span class="calc-val">${fmtBR(custoDespesa)}</span></div>
+      <div class="calc-row subtotal"><span class="calc-label">Custo total/mês</span><span class="calc-val">${fmtBR(custoTotal)}</span></div>
+      <div class="calc-row"><span class="calc-label">ISS (${pctBR(iss)})</span><span class="calc-val">${fmtBR(precoMes*iss)}</span></div>
+      <div class="calc-row"><span class="calc-label">PIS (${pctBR(pis)})</span><span class="calc-val">${fmtBR(precoMes*pis)}</span></div>
+      <div class="calc-row"><span class="calc-label">COFINS (${pctBR(cofins)})</span><span class="calc-val">${fmtBR(precoMes*cofins)}</span></div>
+      <div class="calc-row subtotal"><span class="calc-label">Total impostos/mês</span><span class="calc-val">${fmtBR(valorImpostos)}</span></div>
+      <div class="calc-row"><span class="calc-label">Comissão (${pctBR(comiss)})</span><span class="calc-val">${fmtBR(valorComissao)}</span></div>
+      <div class="calc-row"><span class="calc-label">Margem líquida (${pctBR(margem)})</span><span class="calc-val">${fmtBR(valorMargem)}</span></div>
+    `;
+  }
+
+  // Atualizar painel de preços
+  const painelPreco = document.querySelector('#tab-preco .card:last-child div[style*="accent-bg"]');
+  if (painelPreco) {
+    painelPreco.innerHTML = `
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+        <span style="font-size:12px;color:var(--text3)">Preço mínimo/mês</span>
+        <span style="font-size:14px;font-weight:600;color:var(--red)">${fmtBR(precoMinimo)}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+        <span style="font-size:12px;color:var(--text3)">Preço recomendado/mês</span>
+        <span style="font-size:14px;font-weight:600;color:var(--amber)">${fmtBR(precoRecomendado)}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:12px">
+        <span style="font-size:13px;font-weight:600;color:var(--text)">Preço final/mês</span>
+        <span style="font-size:18px;font-weight:700;color:var(--accent-text)">${fmtBR(precoMes)}</span>
+      </div>
+      <div style="height:1px;background:rgba(200,16,46,.2);margin-bottom:12px"></div>
+      <div style="display:flex;justify-content:space-between">
+        <span style="font-size:13px;color:var(--text2)">Valor total do contrato (${prazo} meses)</span>
+        <span style="font-size:16px;font-weight:700;color:var(--accent-text)">${fmtBR(precoContrato)}</span>
+      </div>
+    `;
+  }
+}
 function addPerfil() {
   const tbody = document.getElementById('equipe-body');
   const id = Date.now();
@@ -1138,8 +1225,138 @@ function addPerfil() {
   tbody.appendChild(tr);
   calcEquipe();
 }
-function addInvRow(id) {}
-function addDesp(id) {}
+function addInvRow(tbodyId) {
+  const tbody = document.getElementById(tbodyId);
+  if (!tbody) return;
+  // Remover linha de total se existir
+  const totalRow = tbody.querySelector('tr.total-row');
+  if (totalRow) totalRow.remove();
+
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td><input type="text" placeholder="Descrição do item" style="min-width:160px;width:100%"></td>
+    <td><input type="number" value="1" min="0" style="width:55px" oninput="recalcInv('${tbodyId}')"></td>
+    <td><input type="number" value="0" min="0" style="width:90px" oninput="recalcInv('${tbodyId}')"></td>
+    <td><input type="number" value="60" min="1" style="width:55px" oninput="recalcInv('${tbodyId}')"></td>
+    <td class="num" style="font-size:12px">R$ 0,00</td>
+    <td><button onclick="this.closest('tr').remove();recalcInv('${tbodyId}')"
+      style="background:none;border:none;cursor:pointer;color:var(--red);font-size:15px">
+      <i class="ti ti-trash"></i></button></td>
+  `;
+  // Adicionar coluna de ação no thead se não existir
+  const thead = tbody.closest('table').querySelector('thead tr');
+  if (thead && thead.cells.length === 5) {
+    const th = document.createElement('th'); thead.appendChild(th);
+  }
+  tbody.appendChild(tr);
+  recalcInv(tbodyId);
+}
+
+function recalcInv(tbodyId) {
+  const tbody = document.getElementById(tbodyId);
+  if (!tbody) return;
+  let total = 0;
+  tbody.querySelectorAll('tr:not(.total-row)').forEach(tr => {
+    const inputs = tr.querySelectorAll('input[type=number]');
+    if (inputs.length < 3) return;
+    const qtde  = parseFloat(inputs[0].value) || 0;
+    const valor = parseFloat(inputs[1].value) || 0;
+    const deprec = parseFloat(inputs[2].value) || 1;
+    const mensal = (qtde * valor) / deprec;
+    total += mensal;
+    const td = tr.querySelector('td.num');
+    if (td) td.textContent = 'R$ ' + mensal.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  });
+  // Atualizar/criar linha de total
+  let totalRow = tbody.querySelector('tr.total-row');
+  if (!totalRow) {
+    totalRow = document.createElement('tr');
+    totalRow.className = 'total-row';
+    tbody.appendChild(totalRow);
+  }
+  const cols = tbody.closest('table').querySelector('thead tr').cells.length;
+  totalRow.innerHTML = `<td colspan="${cols-2}"><strong>Subtotal</strong></td><td class="num"><strong>R$ ${total.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}</strong></td><td></td>`;
+}
+function addDesp(tbodyId) {
+  const tbody = document.getElementById(tbodyId);
+  if (!tbody) return;
+  // Remover placeholder vazio
+  const empty = tbody.querySelector('td[colspan]');
+  if (empty) empty.closest('tr').remove();
+  // Remover total
+  const totalRow = tbody.querySelector('tr.total-row');
+  if (totalRow) totalRow.remove();
+
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td><input type="text" placeholder="Descrição" style="min-width:160px;width:100%"></td>
+    <td><input type="number" value="1" min="0" style="width:55px" oninput="recalcDesp('${tbodyId}')"></td>
+    <td><input type="number" value="0" min="0" style="width:90px" oninput="recalcDesp('${tbodyId}')"></td>
+    <td class="num" style="font-size:12px">R$ 0,00</td>
+    <td><button onclick="this.closest('tr').remove();recalcDesp('${tbodyId}')"
+      style="background:none;border:none;cursor:pointer;color:var(--red);font-size:15px">
+      <i class="ti ti-trash"></i></button></td>
+  `;
+  const thead = tbody.closest('table').querySelector('thead tr');
+  if (thead && thead.cells.length === 4) {
+    const th = document.createElement('th'); thead.appendChild(th);
+  }
+  tbody.appendChild(tr);
+  recalcDesp(tbodyId);
+}
+
+function recalcDesp(tbodyId) {
+  const tbody = document.getElementById(tbodyId);
+  if (!tbody) return;
+  let total = 0;
+  tbody.querySelectorAll('tr:not(.total-row)').forEach(tr => {
+    const inputs = tr.querySelectorAll('input[type=number]');
+    if (inputs.length < 2) return;
+    const qtde  = parseFloat(inputs[0].value) || 0;
+    const valor = parseFloat(inputs[1].value) || 0;
+    const subtotal = qtde * valor;
+    total += subtotal;
+    const td = tr.querySelector('td.num');
+    if (td) td.textContent = 'R$ ' + subtotal.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  });
+  let totalRow = tbody.querySelector('tr.total-row');
+  if (!totalRow) {
+    totalRow = document.createElement('tr');
+    totalRow.className = 'total-row';
+    tbody.appendChild(totalRow);
+  }
+  totalRow.innerHTML = `<td colspan="3"><strong>Subtotal</strong></td><td class="num"><strong>R$ ${total.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}</strong></td><td></td>`;
+}
+
+function exportarPDF() {
+  // Mostrar só a aba de precificação e imprimir
+  const titulo = 'MPricing — Proposta ANS #2025-001';
+  const w = window.open('', '_blank', 'width=900,height=700');
+  w.document.write('<html><head><title>' + titulo + '</title>');
+  w.document.write('<style>body{font-family:system-ui;padding:32px;color:#111}');
+  w.document.write('table{width:100%;border-collapse:collapse;margin-top:16px}');
+  w.document.write('th,td{padding:8px 12px;border:1px solid #ddd;font-size:13px}');
+  w.document.write('th{background:#f5f5f5;font-weight:600}.total{font-weight:700;background:#f0f0f0}</style></head><body>');
+  w.document.write('<h2 style="color:#c8102e;margin-bottom:4px">MPricing — Plataforma de Precificação Montreal</h2>');
+  w.document.write('<h3 style="font-weight:400;margin-top:0;color:#555">Proposta ANS #2025-001 — Pregão 90.027/2025</h3>');
+  w.document.write('<hr style="border:none;border-top:2px solid #c8102e;margin-bottom:20px">');
+  // Copiar tabela de equipe
+  const tblEq = document.getElementById('tbl-equipe');
+  if (tblEq) w.document.write('<h4>Composição de Equipe</h4>' + tblEq.outerHTML);
+  // Copiar memória de cálculo
+  const mc = document.getElementById('memoria-calc');
+  if (mc) w.document.write('<h4 style="margin-top:24px">Memória de Cálculo</h4><div style="max-width:500px">' + mc.innerHTML + '</div>');
+  // Painel de preços
+  w.document.write('<h4 style="margin-top:24px">Resultado</h4>');
+  w.document.write('<table><tr class="total"><td>Preço mensal</td><td>' + (document.querySelector('#tab-preco .card:last-child [style*="18px"]')?.textContent || '—') + '</td></tr></table>');
+  w.document.write('<p style="margin-top:32px;font-size:11px;color:#999">Gerado em ' + new Date().toLocaleString('pt-BR') + ' · MPricing v1.0 · Montreal Informática</p>');
+  w.document.write('</body></html>');
+  w.document.close();
+  setTimeout(() => w.print(), 500);
+}
+
+// Inicializar cálculos
+setTimeout(() => { calcEquipe(); calcPreco(); }, 300);
 
 // Charts
 const chartCustosCtx = document.getElementById('chartCustos');
