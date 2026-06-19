@@ -1065,13 +1065,15 @@ tr.total-row td{font-weight:600;background:var(--surface2);border-top:2px solid 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
 function navTo(page, el) {
+  // Se for "nova", abrir modal de identificação em vez de ir direto
+  if (page === 'nova') { abrirModalNovaProosta(); return; }
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   const p = document.getElementById('page-' + page);
   if (p) p.classList.add('active');
   if (el) el.classList.add('active');
   const titles = {
-    dashboard: 'Dashboard', propostas: 'Propostas Comerciais', nova: 'Proposta #2025-001 — ANS',
+    dashboard: 'Dashboard', propostas: 'Propostas Comerciais', nova: 'Nova Proposta',
     perfis: 'Perfis Profissionais', hardware: 'Catálogo de Hardware', software: 'Catálogo de Software',
     insumos: 'Insumos Diversos', parametros: 'Parâmetros de Cálculo', encargos: 'Encargos Trabalhistas',
     sindicatos: 'Sindicatos e Convenções', relatorios: 'Relatórios Gerenciais'
@@ -1350,7 +1352,334 @@ function exportarPDF() {
   w.document.write('<h4 style="margin-top:24px">Resultado</h4>');
   w.document.write('<table><tr class="total"><td>Preço mensal</td><td>' + (document.querySelector('#tab-preco .card:last-child [style*="18px"]')?.textContent || '—') + '</td></tr></table>');
   w.document.write('<p style="margin-top:32px;font-size:11px;color:#999">Gerado em ' + new Date().toLocaleString('pt-BR') + ' · MPricing v1.0 · Montreal Informática</p>');
-  w.document.write('</body></html>');
+  w.document.write('
+<!-- ═══════════════════════ MODAL NOVA PROPOSTA ═══════════════════════ -->
+<div id="modal-nova-proposta" style="
+  display:none;position:fixed;inset:0;z-index:9000;
+  background:rgba(0,0,0,.5);align-items:center;justify-content:center;
+  font-family:'Inter',system-ui,sans-serif
+">
+  <div style="background:#fff;border-radius:16px;padding:32px;width:620px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.2)">
+
+    <!-- Header -->
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px">
+      <div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+          <div style="width:32px;height:32px;background:#fce8eb;border-radius:8px;display:flex;align-items:center;justify-content:center">
+            <i class="ti ti-file-plus" style="font-size:17px;color:#c8102e"></i>
+          </div>
+          <h2 style="font-size:17px;font-weight:700;color:#1a0a0d;margin:0" id="mnp-titulo">Nova proposta</h2>
+        </div>
+        <p style="font-size:13px;color:#6b6860;margin:0 0 0 42px" id="mnp-numero-label">Preencha os dados de identificação</p>
+      </div>
+      <button onclick="fecharModalNova()" style="background:none;border:none;cursor:pointer;color:#9c9a92;font-size:22px;padding:0;line-height:1">&times;</button>
+    </div>
+
+    <!-- Número gerado -->
+    <div style="background:#f9f8f8;border:1px solid #e2e0d8;border-radius:10px;padding:12px 16px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div style="font-size:11px;color:#9c9a92;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">Número da proposta</div>
+        <div style="font-size:18px;font-weight:700;color:#c8102e" id="mnp-numero">#2025-001</div>
+      </div>
+      <div>
+        <div style="font-size:11px;color:#9c9a92;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">Data de criação</div>
+        <div style="font-size:13px;font-weight:500;color:#1a0a0d" id="mnp-data">—</div>
+      </div>
+      <div>
+        <div style="font-size:11px;color:#9c9a92;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">Responsável</div>
+        <div style="font-size:13px;font-weight:500;color:#1a0a0d" id="mnp-resp">—</div>
+      </div>
+    </div>
+
+    <!-- Campos -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+      <div style="grid-column:1/-1">
+        <label style="font-size:12px;font-weight:500;color:#6b6860;display:block;margin-bottom:4px">Cliente / Órgão <span style="color:#c8102e">*</span></label>
+        <input id="mnp-cliente" type="text" placeholder="Ex: ANS — Agência Nacional de Saúde Suplementar"
+          style="width:100%;padding:9px 12px;border:1px solid #e2e0d8;border-radius:8px;font-size:13px;outline:none;font-family:inherit;box-sizing:border-box"
+          onfocus="this.style.borderColor='#c8102e'" onblur="this.style.borderColor='#e2e0d8'">
+      </div>
+      <div>
+        <label style="font-size:12px;font-weight:500;color:#6b6860;display:block;margin-bottom:4px">Nº do Processo / Pregão</label>
+        <input id="mnp-processo" type="text" placeholder="Ex: Pregão 90.027/2025"
+          style="width:100%;padding:9px 12px;border:1px solid #e2e0d8;border-radius:8px;font-size:13px;outline:none;font-family:inherit;box-sizing:border-box"
+          onfocus="this.style.borderColor='#c8102e'" onblur="this.style.borderColor='#e2e0d8'">
+      </div>
+      <div>
+        <label style="font-size:12px;font-weight:500;color:#6b6860;display:block;margin-bottom:4px">Data de abertura</label>
+        <input id="mnp-abertura" type="date"
+          style="width:100%;padding:9px 12px;border:1px solid #e2e0d8;border-radius:8px;font-size:13px;outline:none;font-family:inherit;box-sizing:border-box"
+          onfocus="this.style.borderColor='#c8102e'" onblur="this.style.borderColor='#e2e0d8'">
+      </div>
+      <div>
+        <label style="font-size:12px;font-weight:500;color:#6b6860;display:block;margin-bottom:4px">Prazo contratual (meses) <span style="color:#c8102e">*</span></label>
+        <input id="mnp-prazo" type="number" value="24" min="1" max="120"
+          style="width:100%;padding:9px 12px;border:1px solid #e2e0d8;border-radius:8px;font-size:13px;outline:none;font-family:inherit;box-sizing:border-box"
+          onfocus="this.style.borderColor='#c8102e'" onblur="this.style.borderColor='#e2e0d8'">
+      </div>
+      <div>
+        <label style="font-size:12px;font-weight:500;color:#6b6860;display:block;margin-bottom:4px">Município / UF</label>
+        <input id="mnp-municipio" type="text" placeholder="Ex: Rio de Janeiro/RJ"
+          style="width:100%;padding:9px 12px;border:1px solid #e2e0d8;border-radius:8px;font-size:13px;outline:none;font-family:inherit;box-sizing:border-box"
+          onfocus="this.style.borderColor='#c8102e'" onblur="this.style.borderColor='#e2e0d8'">
+      </div>
+      <div>
+        <label style="font-size:12px;font-weight:500;color:#6b6860;display:block;margin-bottom:4px">Tipo de proposta</label>
+        <select id="mnp-tipo" style="width:100%;padding:9px 12px;border:1px solid #e2e0d8;border-radius:8px;font-size:13px;outline:none;font-family:inherit;background:#fff;box-sizing:border-box">
+          <option>Licitação pública</option>
+          <option>Dispensa de licitação</option>
+          <option>Contrato direto</option>
+          <option>Renovação contratual</option>
+          <option>Proposta comercial</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:12px;font-weight:500;color:#6b6860;display:block;margin-bottom:4px">Sindicato de referência</label>
+        <select id="mnp-sindicato" style="width:100%;padding:9px 12px;border:1px solid #e2e0d8;border-radius:8px;font-size:13px;outline:none;font-family:inherit;background:#fff;box-sizing:border-box">
+          <option>SINDPD.RJ — Rio de Janeiro/RJ</option>
+          <option>SINDPD/ES — Vitória/ES</option>
+          <option>PC × SINTELMARK — Rio de Janeiro/RJ</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:12px;font-weight:500;color:#6b6860;display:block;margin-bottom:4px">Data-base do sindicato</label>
+        <input id="mnp-database" type="month"
+          style="width:100%;padding:9px 12px;border:1px solid #e2e0d8;border-radius:8px;font-size:13px;outline:none;font-family:inherit;box-sizing:border-box"
+          onfocus="this.style.borderColor='#c8102e'" onblur="this.style.borderColor='#e2e0d8'">
+      </div>
+      <div style="grid-column:1/-1">
+        <label style="font-size:12px;font-weight:500;color:#6b6860;display:block;margin-bottom:4px">Observações iniciais</label>
+        <textarea id="mnp-obs" rows="2" placeholder="Informações adicionais sobre a proposta..."
+          style="width:100%;padding:9px 12px;border:1px solid #e2e0d8;border-radius:8px;font-size:13px;outline:none;font-family:inherit;resize:vertical;box-sizing:border-box"
+          onfocus="this.style.borderColor='#c8102e'" onblur="this.style.borderColor='#e2e0d8'"></textarea>
+      </div>
+    </div>
+
+    <!-- Erro -->
+    <div id="mnp-erro" style="display:none;background:#fce8eb;border:1px solid #f5b8c0;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:#a00d24">
+      <i class="ti ti-alert-circle" style="font-size:14px;vertical-align:-2px;margin-right:6px"></i>
+      <span id="mnp-erro-msg">Preencha os campos obrigatórios.</span>
+    </div>
+
+    <!-- Ações -->
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button onclick="fecharModalNova()"
+        style="padding:10px 20px;border:1px solid #e2e0d8;background:#fff;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit;color:#1a0a0d">
+        Cancelar
+      </button>
+      <button onclick="criarNovaPropostaConfirm()"
+        style="padding:10px 24px;background:#c8102e;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">
+        <i class="ti ti-arrow-right" style="font-size:13px;vertical-align:-1px;margin-right:4px"></i>
+        Iniciar composição
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════
+//  Gerenciamento de propostas — MPricing
+// ══════════════════════════════════════════════════
+const PROPS_KEY = 'mpricing_propostas';
+
+function getPropostas() {
+  try { return JSON.parse(localStorage.getItem(PROPS_KEY)) || []; } catch(e) { return []; }
+}
+function savePropostas(ps) { localStorage.setItem(PROPS_KEY, JSON.stringify(ps)); }
+
+function gerarNumero() {
+  const ano  = new Date().getFullYear();
+  const ps   = getPropostas();
+  const seq  = String(ps.length + 1).padStart(3, '0');
+  return `#${ano}-${seq}`;
+}
+
+function abrirModalNovaProosta() {
+  const modal = document.getElementById('modal-nova-proposta');
+  modal.style.display = 'flex';
+
+  // Preencher dados automáticos
+  const numero = gerarNumero();
+  document.getElementById('mnp-numero').textContent = numero;
+  document.getElementById('mnp-data').textContent = new Date().toLocaleDateString('pt-BR');
+  const sess = getSession?.() || {};
+  document.getElementById('mnp-resp').textContent = sess.nome || 'Usuário';
+
+  // Limpar campos
+  ['mnp-cliente','mnp-processo','mnp-municipio','mnp-obs'].forEach(id => {
+    const el = document.getElementById(id); if(el) el.value = '';
+  });
+  document.getElementById('mnp-prazo').value = 24;
+  document.getElementById('mnp-abertura').value = new Date().toISOString().split('T')[0];
+  document.getElementById('mnp-erro').style.display = 'none';
+
+  setTimeout(() => document.getElementById('mnp-cliente').focus(), 100);
+}
+
+function fecharModalNova() {
+  document.getElementById('modal-nova-proposta').style.display = 'none';
+}
+
+function criarNovaPropostaConfirm() {
+  const cliente = document.getElementById('mnp-cliente').value.trim();
+  const prazo   = document.getElementById('mnp-prazo').value;
+
+  if (!cliente) {
+    document.getElementById('mnp-erro-msg').textContent = 'Informe o nome do cliente / órgão.';
+    document.getElementById('mnp-erro').style.display = 'block';
+    document.getElementById('mnp-cliente').focus();
+    return;
+  }
+  if (!prazo || parseInt(prazo) < 1) {
+    document.getElementById('mnp-erro-msg').textContent = 'Informe o prazo contratual em meses.';
+    document.getElementById('mnp-erro').style.display = 'block';
+    return;
+  }
+
+  const numero   = document.getElementById('mnp-numero').textContent;
+  const processo = document.getElementById('mnp-processo').value.trim();
+  const abertura = document.getElementById('mnp-abertura').value;
+  const municipio= document.getElementById('mnp-municipio').value.trim();
+  const tipo     = document.getElementById('mnp-tipo').value;
+  const sindicato= document.getElementById('mnp-sindicato').value;
+  const database = document.getElementById('mnp-database').value;
+  const obs      = document.getElementById('mnp-obs').value.trim();
+  const sess     = getSession?.() || {};
+
+  // Salvar proposta no storage
+  const nova = {
+    id:        'prop_' + Date.now(),
+    numero,
+    cliente,
+    processo,
+    abertura,
+    prazo:     parseInt(prazo),
+    municipio,
+    tipo,
+    sindicato,
+    database,
+    obs,
+    status:    'elaboracao',
+    criado:    new Date().toISOString(),
+    criadoPor: sess.nome || 'Usuário',
+    versao:    1,
+    equipe:    [],
+    totMensal: 0,
+    totContrato: 0,
+    margem:    0
+  };
+
+  const ps = getPropostas();
+  ps.unshift(nova);
+  savePropostas(ps);
+
+  fecharModalNova();
+  abrirPropostaEdicao(nova);
+}
+
+function abrirPropostaEdicao(proposta) {
+  // Atualizar título
+  document.getElementById('topbar-title').textContent = `${proposta.numero} — ${proposta.cliente}`;
+
+  // Resetar stepper
+  document.querySelectorAll('.step').forEach((s,i) => {
+    s.className = 'step' + (i === 1 ? ' active' : '');
+  });
+
+  // Resetar tabs — mostrar equipe
+  document.querySelectorAll('#page-nova .tab-content').forEach(t => t.style.display = 'none');
+  const teq = document.getElementById('tab-equipe'); if(teq) teq.style.display = 'block';
+  document.querySelectorAll('#page-nova .tab').forEach((t,i) => {
+    t.classList.toggle('active', i === 0);
+  });
+
+  // Limpar tabela de equipe
+  const tbody = document.getElementById('equipe-body');
+  if (tbody) {
+    tbody.innerHTML = '';
+    // Linha vazia para começar
+    addPerfil();
+  }
+
+  // Atualizar prazo no tab precificação
+  const prazoEl = document.getElementById('prazo');
+  if (prazoEl) prazoEl.value = proposta.prazo;
+
+  // Navegar para page-nova
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const pNova = document.getElementById('page-nova'); if(pNova) pNova.classList.add('active');
+  const navNova = document.querySelector('[onclick*="nova"]'); if(navNova) navNova.classList.add('active');
+
+  // Recalcular
+  setTimeout(() => { calcEquipe(); calcPreco(); }, 200);
+
+  // Guardar id da proposta ativa
+  window._propostaAtiva = proposta.id;
+}
+
+// Fechar modal ao clicar fora
+document.getElementById('modal-nova-proposta')?.addEventListener('click', function(e) {
+  if (e.target === this) fecharModalNova();
+});
+
+// Atualizar lista de propostas no page-propostas com dados do storage
+function renderPropostas() {
+  const ps = getPropostas();
+  if (!ps.length) return;
+  const tbody = document.querySelector('#page-propostas table tbody');
+  if (!tbody) return;
+
+  const statusMap = {
+    elaboracao: ['badge-blue',  'dot-blue',  'Em elaboração'],
+    revisao:    ['badge-amber', 'dot-amber', 'Em revisão'],
+    aprovada:   ['badge-green', 'dot-green', 'Aprovada'],
+    enviada:    ['badge-gray',  'dot-green', 'Enviada'],
+    ganha:      ['badge-green', 'dot-green', 'Ganha'],
+    perdida:    ['badge-red',   'dot-red',   'Perdida'],
+  };
+
+  // Adicionar novas propostas no topo
+  ps.forEach(p => {
+    if (document.querySelector(`[data-prop-id="${p.id}"]`)) return; // já existe
+    const [bc, dc, sl] = statusMap[p.status] || statusMap.elaboracao;
+    const dt = new Date(p.criado).toLocaleDateString('pt-BR');
+    const tr = document.createElement('tr');
+    tr.dataset.propId = p.id;
+    tr.innerHTML = `
+      <td><strong>${p.numero}</strong><br><span style="font-size:11px;color:var(--text3)">v${p.versao} · ${dt}</span></td>
+      <td>${p.cliente}<br><span style="font-size:11px;color:var(--text3)">${p.processo || '—'}</span></td>
+      <td>${p.prazo} meses</td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num"><span class="badge ${bc}">—</span></td>
+      <td><span class="badge ${bc}"><span class="dot ${dc}"></span>${sl}</span></td>
+      <td><div class="td-action">
+        <button class="btn btn-sm btn-ghost" onclick="abrirPropostaEdicao(${JSON.stringify(p).replace(/"/g,'&quot;')})"><i class="ti ti-edit"></i></button>
+        <button class="btn btn-sm btn-ghost" onclick="excluirProposta('${p.id}')"><i class="ti ti-trash"></i></button>
+      </div></td>
+    `;
+    tbody.insertBefore(tr, tbody.firstChild);
+  });
+}
+
+function excluirProposta(id) {
+  if (!confirm('Excluir esta proposta?')) return;
+  const ps = getPropostas().filter(p => p.id !== id);
+  savePropostas(ps);
+  document.querySelector(`[data-prop-id="${id}"]`)?.remove();
+}
+
+// Render ao navegar para propostas
+const _navToOrig = navTo;
+// Já interceptado — ao ir para propostas, renderizar
+document.querySelectorAll('[onclick*="propostas"]').forEach(btn => {
+  btn.addEventListener('click', () => setTimeout(renderPropostas, 100));
+});
+</script>
+
+</body></html>');
   w.document.close();
   setTimeout(() => w.print(), 500);
 }
@@ -1829,6 +2158,333 @@ document.head.appendChild(shakeStyle);
   document.getElementById('auth-overlay').style.display = 'flex';
   setTimeout(() => document.getElementById('login-user').focus(), 100);
 })();
+</script>
+
+
+<!-- ═══════════════════════ MODAL NOVA PROPOSTA ═══════════════════════ -->
+<div id="modal-nova-proposta" style="
+  display:none;position:fixed;inset:0;z-index:9000;
+  background:rgba(0,0,0,.5);align-items:center;justify-content:center;
+  font-family:'Inter',system-ui,sans-serif
+">
+  <div style="background:#fff;border-radius:16px;padding:32px;width:620px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.2)">
+
+    <!-- Header -->
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px">
+      <div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+          <div style="width:32px;height:32px;background:#fce8eb;border-radius:8px;display:flex;align-items:center;justify-content:center">
+            <i class="ti ti-file-plus" style="font-size:17px;color:#c8102e"></i>
+          </div>
+          <h2 style="font-size:17px;font-weight:700;color:#1a0a0d;margin:0" id="mnp-titulo">Nova proposta</h2>
+        </div>
+        <p style="font-size:13px;color:#6b6860;margin:0 0 0 42px" id="mnp-numero-label">Preencha os dados de identificação</p>
+      </div>
+      <button onclick="fecharModalNova()" style="background:none;border:none;cursor:pointer;color:#9c9a92;font-size:22px;padding:0;line-height:1">&times;</button>
+    </div>
+
+    <!-- Número gerado -->
+    <div style="background:#f9f8f8;border:1px solid #e2e0d8;border-radius:10px;padding:12px 16px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div style="font-size:11px;color:#9c9a92;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">Número da proposta</div>
+        <div style="font-size:18px;font-weight:700;color:#c8102e" id="mnp-numero">#2025-001</div>
+      </div>
+      <div>
+        <div style="font-size:11px;color:#9c9a92;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">Data de criação</div>
+        <div style="font-size:13px;font-weight:500;color:#1a0a0d" id="mnp-data">—</div>
+      </div>
+      <div>
+        <div style="font-size:11px;color:#9c9a92;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">Responsável</div>
+        <div style="font-size:13px;font-weight:500;color:#1a0a0d" id="mnp-resp">—</div>
+      </div>
+    </div>
+
+    <!-- Campos -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+      <div style="grid-column:1/-1">
+        <label style="font-size:12px;font-weight:500;color:#6b6860;display:block;margin-bottom:4px">Cliente / Órgão <span style="color:#c8102e">*</span></label>
+        <input id="mnp-cliente" type="text" placeholder="Ex: ANS — Agência Nacional de Saúde Suplementar"
+          style="width:100%;padding:9px 12px;border:1px solid #e2e0d8;border-radius:8px;font-size:13px;outline:none;font-family:inherit;box-sizing:border-box"
+          onfocus="this.style.borderColor='#c8102e'" onblur="this.style.borderColor='#e2e0d8'">
+      </div>
+      <div>
+        <label style="font-size:12px;font-weight:500;color:#6b6860;display:block;margin-bottom:4px">Nº do Processo / Pregão</label>
+        <input id="mnp-processo" type="text" placeholder="Ex: Pregão 90.027/2025"
+          style="width:100%;padding:9px 12px;border:1px solid #e2e0d8;border-radius:8px;font-size:13px;outline:none;font-family:inherit;box-sizing:border-box"
+          onfocus="this.style.borderColor='#c8102e'" onblur="this.style.borderColor='#e2e0d8'">
+      </div>
+      <div>
+        <label style="font-size:12px;font-weight:500;color:#6b6860;display:block;margin-bottom:4px">Data de abertura</label>
+        <input id="mnp-abertura" type="date"
+          style="width:100%;padding:9px 12px;border:1px solid #e2e0d8;border-radius:8px;font-size:13px;outline:none;font-family:inherit;box-sizing:border-box"
+          onfocus="this.style.borderColor='#c8102e'" onblur="this.style.borderColor='#e2e0d8'">
+      </div>
+      <div>
+        <label style="font-size:12px;font-weight:500;color:#6b6860;display:block;margin-bottom:4px">Prazo contratual (meses) <span style="color:#c8102e">*</span></label>
+        <input id="mnp-prazo" type="number" value="24" min="1" max="120"
+          style="width:100%;padding:9px 12px;border:1px solid #e2e0d8;border-radius:8px;font-size:13px;outline:none;font-family:inherit;box-sizing:border-box"
+          onfocus="this.style.borderColor='#c8102e'" onblur="this.style.borderColor='#e2e0d8'">
+      </div>
+      <div>
+        <label style="font-size:12px;font-weight:500;color:#6b6860;display:block;margin-bottom:4px">Município / UF</label>
+        <input id="mnp-municipio" type="text" placeholder="Ex: Rio de Janeiro/RJ"
+          style="width:100%;padding:9px 12px;border:1px solid #e2e0d8;border-radius:8px;font-size:13px;outline:none;font-family:inherit;box-sizing:border-box"
+          onfocus="this.style.borderColor='#c8102e'" onblur="this.style.borderColor='#e2e0d8'">
+      </div>
+      <div>
+        <label style="font-size:12px;font-weight:500;color:#6b6860;display:block;margin-bottom:4px">Tipo de proposta</label>
+        <select id="mnp-tipo" style="width:100%;padding:9px 12px;border:1px solid #e2e0d8;border-radius:8px;font-size:13px;outline:none;font-family:inherit;background:#fff;box-sizing:border-box">
+          <option>Licitação pública</option>
+          <option>Dispensa de licitação</option>
+          <option>Contrato direto</option>
+          <option>Renovação contratual</option>
+          <option>Proposta comercial</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:12px;font-weight:500;color:#6b6860;display:block;margin-bottom:4px">Sindicato de referência</label>
+        <select id="mnp-sindicato" style="width:100%;padding:9px 12px;border:1px solid #e2e0d8;border-radius:8px;font-size:13px;outline:none;font-family:inherit;background:#fff;box-sizing:border-box">
+          <option>SINDPD.RJ — Rio de Janeiro/RJ</option>
+          <option>SINDPD/ES — Vitória/ES</option>
+          <option>PC × SINTELMARK — Rio de Janeiro/RJ</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:12px;font-weight:500;color:#6b6860;display:block;margin-bottom:4px">Data-base do sindicato</label>
+        <input id="mnp-database" type="month"
+          style="width:100%;padding:9px 12px;border:1px solid #e2e0d8;border-radius:8px;font-size:13px;outline:none;font-family:inherit;box-sizing:border-box"
+          onfocus="this.style.borderColor='#c8102e'" onblur="this.style.borderColor='#e2e0d8'">
+      </div>
+      <div style="grid-column:1/-1">
+        <label style="font-size:12px;font-weight:500;color:#6b6860;display:block;margin-bottom:4px">Observações iniciais</label>
+        <textarea id="mnp-obs" rows="2" placeholder="Informações adicionais sobre a proposta..."
+          style="width:100%;padding:9px 12px;border:1px solid #e2e0d8;border-radius:8px;font-size:13px;outline:none;font-family:inherit;resize:vertical;box-sizing:border-box"
+          onfocus="this.style.borderColor='#c8102e'" onblur="this.style.borderColor='#e2e0d8'"></textarea>
+      </div>
+    </div>
+
+    <!-- Erro -->
+    <div id="mnp-erro" style="display:none;background:#fce8eb;border:1px solid #f5b8c0;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:#a00d24">
+      <i class="ti ti-alert-circle" style="font-size:14px;vertical-align:-2px;margin-right:6px"></i>
+      <span id="mnp-erro-msg">Preencha os campos obrigatórios.</span>
+    </div>
+
+    <!-- Ações -->
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button onclick="fecharModalNova()"
+        style="padding:10px 20px;border:1px solid #e2e0d8;background:#fff;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit;color:#1a0a0d">
+        Cancelar
+      </button>
+      <button onclick="criarNovaPropostaConfirm()"
+        style="padding:10px 24px;background:#c8102e;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">
+        <i class="ti ti-arrow-right" style="font-size:13px;vertical-align:-1px;margin-right:4px"></i>
+        Iniciar composição
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════
+//  Gerenciamento de propostas — MPricing
+// ══════════════════════════════════════════════════
+const PROPS_KEY = 'mpricing_propostas';
+
+function getPropostas() {
+  try { return JSON.parse(localStorage.getItem(PROPS_KEY)) || []; } catch(e) { return []; }
+}
+function savePropostas(ps) { localStorage.setItem(PROPS_KEY, JSON.stringify(ps)); }
+
+function gerarNumero() {
+  const ano  = new Date().getFullYear();
+  const ps   = getPropostas();
+  const seq  = String(ps.length + 1).padStart(3, '0');
+  return `#${ano}-${seq}`;
+}
+
+function abrirModalNovaProosta() {
+  const modal = document.getElementById('modal-nova-proposta');
+  modal.style.display = 'flex';
+
+  // Preencher dados automáticos
+  const numero = gerarNumero();
+  document.getElementById('mnp-numero').textContent = numero;
+  document.getElementById('mnp-data').textContent = new Date().toLocaleDateString('pt-BR');
+  const sess = getSession?.() || {};
+  document.getElementById('mnp-resp').textContent = sess.nome || 'Usuário';
+
+  // Limpar campos
+  ['mnp-cliente','mnp-processo','mnp-municipio','mnp-obs'].forEach(id => {
+    const el = document.getElementById(id); if(el) el.value = '';
+  });
+  document.getElementById('mnp-prazo').value = 24;
+  document.getElementById('mnp-abertura').value = new Date().toISOString().split('T')[0];
+  document.getElementById('mnp-erro').style.display = 'none';
+
+  setTimeout(() => document.getElementById('mnp-cliente').focus(), 100);
+}
+
+function fecharModalNova() {
+  document.getElementById('modal-nova-proposta').style.display = 'none';
+}
+
+function criarNovaPropostaConfirm() {
+  const cliente = document.getElementById('mnp-cliente').value.trim();
+  const prazo   = document.getElementById('mnp-prazo').value;
+
+  if (!cliente) {
+    document.getElementById('mnp-erro-msg').textContent = 'Informe o nome do cliente / órgão.';
+    document.getElementById('mnp-erro').style.display = 'block';
+    document.getElementById('mnp-cliente').focus();
+    return;
+  }
+  if (!prazo || parseInt(prazo) < 1) {
+    document.getElementById('mnp-erro-msg').textContent = 'Informe o prazo contratual em meses.';
+    document.getElementById('mnp-erro').style.display = 'block';
+    return;
+  }
+
+  const numero   = document.getElementById('mnp-numero').textContent;
+  const processo = document.getElementById('mnp-processo').value.trim();
+  const abertura = document.getElementById('mnp-abertura').value;
+  const municipio= document.getElementById('mnp-municipio').value.trim();
+  const tipo     = document.getElementById('mnp-tipo').value;
+  const sindicato= document.getElementById('mnp-sindicato').value;
+  const database = document.getElementById('mnp-database').value;
+  const obs      = document.getElementById('mnp-obs').value.trim();
+  const sess     = getSession?.() || {};
+
+  // Salvar proposta no storage
+  const nova = {
+    id:        'prop_' + Date.now(),
+    numero,
+    cliente,
+    processo,
+    abertura,
+    prazo:     parseInt(prazo),
+    municipio,
+    tipo,
+    sindicato,
+    database,
+    obs,
+    status:    'elaboracao',
+    criado:    new Date().toISOString(),
+    criadoPor: sess.nome || 'Usuário',
+    versao:    1,
+    equipe:    [],
+    totMensal: 0,
+    totContrato: 0,
+    margem:    0
+  };
+
+  const ps = getPropostas();
+  ps.unshift(nova);
+  savePropostas(ps);
+
+  fecharModalNova();
+  abrirPropostaEdicao(nova);
+}
+
+function abrirPropostaEdicao(proposta) {
+  // Atualizar título
+  document.getElementById('topbar-title').textContent = `${proposta.numero} — ${proposta.cliente}`;
+
+  // Resetar stepper
+  document.querySelectorAll('.step').forEach((s,i) => {
+    s.className = 'step' + (i === 1 ? ' active' : '');
+  });
+
+  // Resetar tabs — mostrar equipe
+  document.querySelectorAll('#page-nova .tab-content').forEach(t => t.style.display = 'none');
+  const teq = document.getElementById('tab-equipe'); if(teq) teq.style.display = 'block';
+  document.querySelectorAll('#page-nova .tab').forEach((t,i) => {
+    t.classList.toggle('active', i === 0);
+  });
+
+  // Limpar tabela de equipe
+  const tbody = document.getElementById('equipe-body');
+  if (tbody) {
+    tbody.innerHTML = '';
+    // Linha vazia para começar
+    addPerfil();
+  }
+
+  // Atualizar prazo no tab precificação
+  const prazoEl = document.getElementById('prazo');
+  if (prazoEl) prazoEl.value = proposta.prazo;
+
+  // Navegar para page-nova
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const pNova = document.getElementById('page-nova'); if(pNova) pNova.classList.add('active');
+  const navNova = document.querySelector('[onclick*="nova"]'); if(navNova) navNova.classList.add('active');
+
+  // Recalcular
+  setTimeout(() => { calcEquipe(); calcPreco(); }, 200);
+
+  // Guardar id da proposta ativa
+  window._propostaAtiva = proposta.id;
+}
+
+// Fechar modal ao clicar fora
+document.getElementById('modal-nova-proposta')?.addEventListener('click', function(e) {
+  if (e.target === this) fecharModalNova();
+});
+
+// Atualizar lista de propostas no page-propostas com dados do storage
+function renderPropostas() {
+  const ps = getPropostas();
+  if (!ps.length) return;
+  const tbody = document.querySelector('#page-propostas table tbody');
+  if (!tbody) return;
+
+  const statusMap = {
+    elaboracao: ['badge-blue',  'dot-blue',  'Em elaboração'],
+    revisao:    ['badge-amber', 'dot-amber', 'Em revisão'],
+    aprovada:   ['badge-green', 'dot-green', 'Aprovada'],
+    enviada:    ['badge-gray',  'dot-green', 'Enviada'],
+    ganha:      ['badge-green', 'dot-green', 'Ganha'],
+    perdida:    ['badge-red',   'dot-red',   'Perdida'],
+  };
+
+  // Adicionar novas propostas no topo
+  ps.forEach(p => {
+    if (document.querySelector(`[data-prop-id="${p.id}"]`)) return; // já existe
+    const [bc, dc, sl] = statusMap[p.status] || statusMap.elaboracao;
+    const dt = new Date(p.criado).toLocaleDateString('pt-BR');
+    const tr = document.createElement('tr');
+    tr.dataset.propId = p.id;
+    tr.innerHTML = `
+      <td><strong>${p.numero}</strong><br><span style="font-size:11px;color:var(--text3)">v${p.versao} · ${dt}</span></td>
+      <td>${p.cliente}<br><span style="font-size:11px;color:var(--text3)">${p.processo || '—'}</span></td>
+      <td>${p.prazo} meses</td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num"><span class="badge ${bc}">—</span></td>
+      <td><span class="badge ${bc}"><span class="dot ${dc}"></span>${sl}</span></td>
+      <td><div class="td-action">
+        <button class="btn btn-sm btn-ghost" onclick="abrirPropostaEdicao(${JSON.stringify(p).replace(/"/g,'&quot;')})"><i class="ti ti-edit"></i></button>
+        <button class="btn btn-sm btn-ghost" onclick="excluirProposta('${p.id}')"><i class="ti ti-trash"></i></button>
+      </div></td>
+    `;
+    tbody.insertBefore(tr, tbody.firstChild);
+  });
+}
+
+function excluirProposta(id) {
+  if (!confirm('Excluir esta proposta?')) return;
+  const ps = getPropostas().filter(p => p.id !== id);
+  savePropostas(ps);
+  document.querySelector(`[data-prop-id="${id}"]`)?.remove();
+}
+
+// Render ao navegar para propostas
+const _navToOrig = navTo;
+// Já interceptado — ao ir para propostas, renderizar
+document.querySelectorAll('[onclick*="propostas"]').forEach(btn => {
+  btn.addEventListener('click', () => setTimeout(renderPropostas, 100));
+});
 </script>
 
 </body>
