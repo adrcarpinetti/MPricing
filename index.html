@@ -1401,7 +1401,7 @@ function toggleUserMenu() {
     var btnReset = document.createElement('button');
     btnReset.style.cssText = 'width:100%;padding:10px 14px;text-align:left;background:none;border:none;border-top:1px solid #f1f0ec;cursor:pointer;font-size:13px;font-family:inherit;display:flex;align-items:center;gap:8px;color:#a00d24';
     btnReset.innerHTML = '<i class="ti ti-database-x" style="font-size:15px"></i> Limpar base de dados';
-    btnReset.addEventListener('click', function(e){ e.stopPropagation(); menu.remove(); navTo('reset', null); });
+    btnReset.addEventListener('click', function(){ menu.remove(); navTo('reset', null); });
     menu.appendChild(btnReset);
   }
 
@@ -1413,7 +1413,17 @@ function toggleUserMenu() {
   menu.appendChild(btnSair);
 
   document.body.appendChild(menu);
-  setTimeout(function(){ document.addEventListener('click', function rmMenu(e){ if(document.getElementById('user-dropdown')) { menu.remove(); } document.removeEventListener('click', rmMenu); }); }, 200);
+  // Fechar ao clicar fora — verificar se o target está dentro do menu
+  setTimeout(function(){
+    function rmMenu(e) {
+      var drop = document.getElementById('user-dropdown');
+      if(drop && !drop.contains(e.target)) {
+        drop.remove();
+        document.removeEventListener('click', rmMenu);
+      }
+    }
+    document.addEventListener('click', rmMenu);
+  }, 10);
 }
 
 function abrirTrocarSenha() {
