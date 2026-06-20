@@ -1383,402 +1383,50 @@ function calcPreco(){
 
 // ── EXPORTAR PDF ──────────────────────────────────────
 function exportarPDF(){
-  const titulo=document.getElementById('topbar-title').textContent;
-  const w=window.open('','_blank','width=900,height=700');
-  if(!w)return;
-  const precoFinal=document.getElementById('preco-final')?.textContent||'—';
-  const precoContrato=document.getElementById('preco-contrato')?.textContent||'—';
-  w.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>'+titulo+'</title>'+
-    '<style>body{font-family:system-ui,sans-serif;padding:32px;color:#111;max-width:900px;margin:0 auto}'+
-    'h1{color:#c8102e;font-size:20px}h2{font-size:15px;font-weight:600;margin:20px 0 8px;border-bottom:1px solid #ddd;padding-bottom:4px}'+
-    'table{width:100%;border-collapse:collapse;margin-bottom:16px;font-size:13px}'+
-    'th{padding:7px 10px;background:#f5f5f5;text-align:left;font-size:11px;font-weight:600;color:#666;border:1px solid #ddd}'+
-    'td{padding:7px 10px;border:1px solid #ddd}'+
-    '.valor{text-align:right;font-family:monospace}.total{font-weight:700;background:#fce8eb}'+
-    'footer{margin-top:32px;font-size:11px;color:#999;border-top:1px solid #eee;padding-top:12px}</style></head><body>');
-  w.document.write('<h1>MPricing — Plataforma de Precificação Montreal</h1>');
-  w.document.write('<p style="color:#666;font-size:13px;margin-top:-8px">'+titulo+' · Gerado em '+new Date().toLocaleString('pt-BR')+'</p>');
-  w.document.write('<h2>Composição de Equipe</h2>');
-  const tbl=document.getElementById('tbl-equipe');
-  if(tbl)w.document.write(tbl.outerHTML);
-  w.document.write('<h2>Precificação</h2><table>');
-  [['Custo pessoal/mês',document.getElementById('mc-pessoal')?.textContent],
-   ['Investimentos/mês',document.getElementById('mc-invest')?.textContent],
-   ['Despesas mensais',document.getElementById('mc-despesas')?.textContent],
-   ['ISS',document.getElementById('mc-iss')?.textContent],
-   ['PIS',document.getElementById('mc-pis')?.textContent],
-   ['COFINS',document.getElementById('mc-cofins')?.textContent],
-   ['Margem líquida',document.getElementById('mc-margem')?.textContent],
-  ].forEach(([l,v])=>w.document.write('<tr><td>'+l+'</td><td class="valor">'+(v||'—')+'</td></tr>'));
-  w.document.write('<tr class="total"><td>Preço final/mês</td><td class="valor">'+precoFinal+'</td></tr>');
-  w.document.write('<tr class="total"><td>Valor total do contrato</td><td class="valor">'+precoContrato+'</td></tr>');
-  w.document.write('</table><footer>MPricing v1.0 · Montreal Informática · Acesso restrito</footer>
-<script>
-// ═══════════════════════════════════════════════════════
-//  MPricing — Parâmetros, Encargos e Sindicatos
-// ═══════════════════════════════════════════════════════
-
-const PARAMS_KEY    = 'mpricing_params';
-const ENCARGOS_KEY  = 'mpricing_encargos';
-const SINDICATOS_KEY= 'mpricing_sindicatos';
-
-// ── DEFAULTS ────────────────────────────────────────
-const PARAMS_DEFAULT = {
-  vr8:9.00, vr6:25.30, vt:35.00, vtDesc:6,
-  saude:385.00, odonto:21.21, saudeDep:385.00, dias:22,
-  iss1:3.40, iss2:5.00, pis:0.65, cofins:3.00,
-  cprb:3.00, ir:15.00, csll:9.00, margemMin:10.00,
-  heNorm:50, heFs:100, noturno:30, sobreaviso:35,
-  periculosidade:30, insalubridade:20
-};
-
-const ENCARGOS_DEFAULT = {
-  inss:15.8333, sesi:1.5, senai:1.0, incra:0.2, edu:2.5,
-  fgts:8.0, sat:3.3708, sebrae:0.6,
-  ferias:8.33, adicFerias:2.78, doenca:1.66, matern:0.05,
-  faltas:0.82, acidente:0.03, aviso:0.42, dec13:8.33,
-  cAviso:0.42, cFgtsAv:0.0336, cMulta:3.44,
-  dGps:0.71, dMulta:0.06, dIncid:7.39, eIncid:0.2825
-};
-
-const SINDICATOS_DEFAULT = [
-  {id:'s1', nome:'SINDPD.RJ', abrangencia:'Rio de Janeiro/RJ', database:'2025-09',
-   vr8:35.00, vr6:25.30, saude:308.01, vt:35.00, status:'vigente'},
-  {id:'s2', nome:'SINDPD/ES', abrangencia:'Vitória/ES', database:'2025-05',
-   vr8:31.56, vr6:31.56, saude:198.03, vt:31.56, status:'vigente'},
-  {id:'s3', nome:'PC × SINTELMARK', abrangencia:'Rio de Janeiro/RJ', database:'2025-01',
-   vr8:22.04, vr6:16.24, saude:308.01, vt:22.04, status:'vigente'},
-];
-
-// ── STORAGE ─────────────────────────────────────────
-function getParams()    { try{return {...PARAMS_DEFAULT,...JSON.parse(localStorage.getItem(PARAMS_KEY))}}catch(e){return{...PARAMS_DEFAULT}} }
-function saveParamsData(d){ localStorage.setItem(PARAMS_KEY,JSON.stringify(d)); }
-function getEncargos()  { try{return {...ENCARGOS_DEFAULT,...JSON.parse(localStorage.getItem(ENCARGOS_KEY))}}catch(e){return{...ENCARGOS_DEFAULT}} }
-function saveEncargosData(d){ localStorage.setItem(ENCARGOS_KEY,JSON.stringify(d)); }
-function getSindicatos(){ try{const d=JSON.parse(localStorage.getItem(SINDICATOS_KEY));return d&&d.length?d:[...SINDICATOS_DEFAULT]}catch(e){return[...SINDICATOS_DEFAULT]} }
-function saveSindicatosData(d){ localStorage.setItem(SINDICATOS_KEY,JSON.stringify(d)); }
-
-// ── PARÂMETROS ───────────────────────────────────────
-let _paramsAlterado = false;
-
-function carregarParametros() {
-  const p = getParams();
-  const map = {
-    'p-vr8':p.vr8,'p-vr6':p.vr6,'p-vt':p.vt,'p-vt-desc':p.vtDesc,
-    'p-saude':p.saude,'p-odonto':p.odonto,'p-saude-dep':p.saudeDep,'p-dias':p.dias,
-    'p-iss1':p.iss1,'p-iss2':p.iss2,'p-pis':p.pis,'p-cofins':p.cofins,
-    'p-cprb':p.cprb,'p-ir':p.ir,'p-csll':p.csll,'p-margem-min':p.margemMin,
-    'p-he-norm':p.heNorm,'p-he-fs':p.heFs,'p-noturno':p.noturno,
-    'p-sobreaviso':p.sobreaviso,'p-periculosidade':p.periculosidade,'p-insalubridade':p.insalubridade
-  };
-  Object.entries(map).forEach(([id,v])=>{const el=document.getElementById(id);if(el)el.value=v;});
-  renderParamsHistorico();
-}
-
-function marcarAlterado() {
-  _paramsAlterado = true;
-  const bar = document.getElementById('params-alterado');
-  if(bar) bar.style.display='flex';
-}
-
-function salvarParametros() {
-  const p = {
-    vr8:   +document.getElementById('p-vr8')?.value||35,
-    vr6:   +document.getElementById('p-vr6')?.value||25.30,
-    vt:    +document.getElementById('p-vt')?.value||35,
-    vtDesc:+document.getElementById('p-vt-desc')?.value||6,
-    saude: +document.getElementById('p-saude')?.value||385,
-    odonto:+document.getElementById('p-odonto')?.value||21.21,
-    saudeDep:+document.getElementById('p-saude-dep')?.value||385,
-    dias:  +document.getElementById('p-dias')?.value||22,
-    iss1:  +document.getElementById('p-iss1')?.value||3.4,
-    iss2:  +document.getElementById('p-iss2')?.value||5.0,
-    pis:   +document.getElementById('p-pis')?.value||0.65,
-    cofins:+document.getElementById('p-cofins')?.value||3.0,
-    cprb:  +document.getElementById('p-cprb')?.value||3.0,
-    ir:    +document.getElementById('p-ir')?.value||15,
-    csll:  +document.getElementById('p-csll')?.value||9,
-    margemMin:+document.getElementById('p-margem-min')?.value||10,
-    heNorm:+document.getElementById('p-he-norm')?.value||50,
-    heFs:  +document.getElementById('p-he-fs')?.value||100,
-    noturno:+document.getElementById('p-noturno')?.value||30,
-    sobreaviso:+document.getElementById('p-sobreaviso')?.value||35,
-    periculosidade:+document.getElementById('p-periculosidade')?.value||30,
-    insalubridade:+document.getElementById('p-insalubridade')?.value||20,
-    _savedAt: new Date().toISOString(),
-    _savedBy: getSession()?.nome||'Usuário'
-  };
-  // Versionar
-  let hist = [];
-  try { hist = JSON.parse(localStorage.getItem(PARAMS_KEY+'_hist'))||[]; } catch(e){}
-  hist.unshift({...p, _ver: hist.length+1});
-  if(hist.length>10) hist=hist.slice(0,10);
-  localStorage.setItem(PARAMS_KEY+'_hist', JSON.stringify(hist));
-  saveParamsData(p);
-  _paramsAlterado = false;
-  const bar = document.getElementById('params-alterado'); if(bar) bar.style.display='none';
-  const ok  = document.getElementById('params-salvo');
-  if(ok){ ok.style.display='flex'; setTimeout(()=>ok.style.display='none',3000); }
-  renderParamsHistorico();
-  // Atualizar campos da composição com novos valores
-  const benDias = document.getElementById('ben-dias'); if(benDias) benDias.value=p.dias;
-  const benVtDia= document.getElementById('ben-vt-dia'); if(benVtDia) benVtDia.value=p.vt;
-  const benVtD  = document.getElementById('ben-vt-desc'); if(benVtD) benVtD.value=p.vtDesc;
-  const benVr8  = document.getElementById('ben-vr8'); if(benVr8) benVr8.value=p.vr8;
-  const benSau  = document.getElementById('ben-saude'); if(benSau) benSau.value=p.saude;
-  const benOdo  = document.getElementById('ben-odonto'); if(benOdo) benOdo.value=p.odonto;
-}
-
-function restaurarParametrosPadrao() {
-  if(!confirm('Restaurar todos os valores padrão? Os valores atuais serão perdidos.')) return;
-  Object.entries(PARAMS_DEFAULT).forEach(([k,v])=>{
-    const map={vr8:'p-vr8',vr6:'p-vr6',vt:'p-vt',vtDesc:'p-vt-desc',
-      saude:'p-saude',odonto:'p-odonto',saudeDep:'p-saude-dep',dias:'p-dias',
-      iss1:'p-iss1',iss2:'p-iss2',pis:'p-pis',cofins:'p-cofins',
-      cprb:'p-cprb',ir:'p-ir',csll:'p-csll',margemMin:'p-margem-min',
-      heNorm:'p-he-norm',heFs:'p-he-fs',noturno:'p-noturno',
-      sobreaviso:'p-sobreaviso',periculosidade:'p-periculosidade',insalubridade:'p-insalubridade'};
-    const id=map[k]; if(id){const el=document.getElementById(id);if(el)el.value=v;}
-  });
-  marcarAlterado();
-}
-
-function renderParamsHistorico() {
-  const cont = document.getElementById('params-historico'); if(!cont)return;
-  let hist=[];
-  try{hist=JSON.parse(localStorage.getItem(PARAMS_KEY+'_hist'))||[];}catch(e){}
-  if(!hist.length){
-    cont.innerHTML='<div style="text-align:center;padding:20px;color:var(--text3);font-size:13px">Nenhuma versão salva ainda.</div>';
-    return;
-  }
-  cont.innerHTML='<table><thead><tr><th>Versão</th><th>Salvo em</th><th>Por</th><th></th></tr></thead><tbody>'+
-    hist.map((h,i)=>'<tr>'+
-      '<td><strong>v'+(hist.length-i)+(i===0?' — atual':''+'</strong></td>')+
-      '<td style="font-size:12px">'+new Date(h._savedAt).toLocaleString('pt-BR')+'</td>'+
-      '<td style="font-size:12px">'+(h._savedBy||'—')+'</td>'+
-      '<td>'+(i===0?'<span class="badge badge-green">Vigente</span>':'<button class="btn btn-sm btn-ghost" title="Restaurar esta versão" onclick="restaurarVersaoParam('+i+')"><i class="ti ti-history"></i></button>')+'</td>'+
-    '</tr>').join('')+'</tbody></table>';
-}
-
-function restaurarVersaoParam(idx) {
-  if(!confirm('Restaurar esta versão? Os valores atuais serão substituídos.'))return;
-  let hist=[];
-  try{hist=JSON.parse(localStorage.getItem(PARAMS_KEY+'_hist'))||[];}catch(e){}
-  if(!hist[idx])return;
-  saveParamsData(hist[idx]);
-  carregarParametros();
-  marcarAlterado();
-}
-
-// ── ENCARGOS ─────────────────────────────────────────
-function carregarEncargos() {
-  const e = getEncargos();
-  const map={
-    'enc-a-inss':e.inss,'enc-a-sesi':e.sesi,'enc-a-senai':e.senai,'enc-a-incra':e.incra,
-    'enc-a-edu':e.edu,'enc-a-fgts':e.fgts,'enc-a-sat':e.sat,'enc-a-sebrae':e.sebrae,
-    'enc-b-ferias':e.ferias,'enc-b-adic-ferias':e.adicFerias,'enc-b-doenca':e.doenca,
-    'enc-b-matern':e.matern,'enc-b-faltas':e.faltas,'enc-b-acidente':e.acidente,
-    'enc-b-aviso':e.aviso,'enc-b-13':e.dec13,
-    'enc-c-aviso':e.cAviso,'enc-c-fgts-av':e.cFgtsAv,'enc-c-multa':e.cMulta,
-    'enc-d-gps':e.dGps,'enc-d-multa':e.dMulta,'enc-d-incid':e.dIncid,'enc-e-incid':e.eIncid
-  };
-  Object.entries(map).forEach(([id,v])=>{const el=document.getElementById(id);if(el)el.value=v;});
-  calcEncargos();
-}
-
-function calcEncargos() {
-  const g = id => parseFloat(document.getElementById(id)?.value)||0;
-  const grA = g('enc-a-inss')+g('enc-a-sesi')+g('enc-a-senai')+g('enc-a-incra')+
-               g('enc-a-edu')+g('enc-a-fgts')+g('enc-a-sat')+g('enc-a-sebrae');
-  const grB = g('enc-b-ferias')+g('enc-b-adic-ferias')+g('enc-b-doenca')+g('enc-b-matern')+
-               g('enc-b-faltas')+g('enc-b-acidente')+g('enc-b-aviso')+g('enc-b-13');
-  const grCDE= g('enc-c-aviso')+g('enc-c-fgts-av')+g('enc-c-multa')+
-                g('enc-d-gps')+g('enc-d-multa')+g('enc-d-incid')+g('enc-e-incid');
-  const total = grA + grB + grCDE;
-  const fmt2 = v => v.toFixed(2).replace('.',',')+'%';
-  const set = (id,v) => { const el=document.getElementById(id); if(el)el.textContent=v; };
-  set('enc-grupo-a', fmt2(grA));
-  set('enc-grupo-b', fmt2(grB));
-  set('enc-total-calc', fmt2(total));
-  set('enc-total-exib', fmt2(total-1.19));
-  set('badge-a', fmt2(grA));
-  set('badge-b', fmt2(grB));
-  set('badge-cde', fmt2(grCDE));
-  set('enc-r-a', fmt2(grA));
-  set('enc-r-b', fmt2(grB));
-  set('enc-r-cde', fmt2(grCDE));
-  set('enc-r-total', fmt2(total));
-  set('enc-fator-k-display', (total/100).toFixed(4));
-  // Atualizar constante global de cálculo
-  window._encargosRate = total/100;
-}
-
-function salvarEncargos() {
-  const g = id => parseFloat(document.getElementById(id)?.value)||0;
-  const e = {
-    inss:g('enc-a-inss'),sesi:g('enc-a-sesi'),senai:g('enc-a-senai'),incra:g('enc-a-incra'),
-    edu:g('enc-a-edu'),fgts:g('enc-a-fgts'),sat:g('enc-a-sat'),sebrae:g('enc-a-sebrae'),
-    ferias:g('enc-b-ferias'),adicFerias:g('enc-b-adic-ferias'),doenca:g('enc-b-doenca'),
-    matern:g('enc-b-matern'),faltas:g('enc-b-faltas'),acidente:g('enc-b-acidente'),
-    aviso:g('enc-b-aviso'),dec13:g('enc-b-13'),
-    cAviso:g('enc-c-aviso'),cFgtsAv:g('enc-c-fgts-av'),cMulta:g('enc-c-multa'),
-    dGps:g('enc-d-gps'),dMulta:g('enc-d-multa'),dIncid:g('enc-d-incid'),eIncid:g('enc-e-incid')
-  };
-  saveEncargosData(e);
-  // Atualizar constante ENCARGOS global
-  const total=(e.inss+e.sesi+e.senai+e.incra+e.edu+e.fgts+e.sat+e.sebrae+
-    e.ferias+e.adicFerias+e.doenca+e.matern+e.faltas+e.acidente+e.aviso+e.dec13+
-    e.cAviso+e.cFgtsAv+e.cMulta+e.dGps+e.dMulta+e.dIncid+e.eIncid)/100;
-  window._encargosRate = total;
-  alert('Encargos salvos! Taxa aplicada: '+(total*100).toFixed(4)+'%');
-  calcEquipe();
-}
-
-function restaurarEncargosPadrao() {
-  if(!confirm('Restaurar encargos para os valores padrão da Planilha Amarela ANS?'))return;
-  saveEncargosData({...ENCARGOS_DEFAULT});
-  carregarEncargos();
-}
-
-// ── SINDICATOS ────────────────────────────────────────
-function carregarSindicatos() {
-  renderSindicatos();
-}
-
-function renderSindicatos() {
-  const lista = getSindicatos();
-  const tbody = document.getElementById('sindicatos-body');
-  const vazio = document.getElementById('sindicatos-vazio');
-  if(!tbody)return;
-  tbody.innerHTML='';
-  if(!lista.length){ if(vazio)vazio.style.display='block'; return; }
-  if(vazio)vazio.style.display='none';
-  const fmtR = v => v?'R$ '+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}):'—';
-  const statusMap = {vigente:['badge-green','Vigente'],expirado:['badge-red','Expirado'],negociacao:['badge-amber','Em negociação']};
-  lista.forEach(s=>{
-    const [bc,sl]=statusMap[s.status]||statusMap.vigente;
-    const dbFormatado = s.database ? (() => {const [y,m]=s.database.split('-');const meses=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];return (meses[parseInt(m)-1]||m)+'/'+y;})() : '—';
-    const tr=document.createElement('tr');
-    tr.innerHTML='<td><strong>'+s.nome+'</strong></td>'+
-      '<td style="font-size:13px">'+s.abrangencia+'</td>'+
-      '<td style="font-size:13px">'+dbFormatado+'</td>'+
-      '<td class="num">'+fmtR(s.vr8)+'/dia</td>'+
-      '<td class="num">'+fmtR(s.vr6)+'/dia</td>'+
-      '<td class="num">'+fmtR(s.saude)+'/mês</td>'+
-      '<td class="num">'+fmtR(s.vt)+'/dia</td>'+
-      '<td><span class="badge '+bc+'">'+sl+'</span></td>'+
-      '<td><div class="td-action">'+
-        '<button class="btn btn-sm btn-ghost" onclick="editarSindicato(''+s.id+'')" title="Editar"><i class="ti ti-edit"></i></button>'+
-        '<button class="btn btn-sm btn-ghost" style="color:var(--red)" onclick="excluirSindicato(''+s.id+'')" title="Excluir"><i class="ti ti-trash"></i></button>'+
-      '</div></td>';
-    tbody.appendChild(tr);
-  });
-}
-
-function abrirFormSindicato() {
-  document.getElementById('form-sind-titulo').textContent='Novo sindicato';
-  document.getElementById('sind-edit-id').value='';
-  ['sind-nome','sind-abrangencia','sind-database'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-  ['sind-vr8','sind-vr6','sind-saude','sind-vt'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-  document.getElementById('sind-status').value='vigente';
-  document.getElementById('sind-erro').style.display='none';
-  document.getElementById('form-sindicato').style.display='block';
-  document.getElementById('sind-nome').focus();
-}
-
-function fecharFormSindicato() {
-  document.getElementById('form-sindicato').style.display='none';
-}
-
-function editarSindicato(id) {
-  const lista=getSindicatos();
-  const s=lista.find(x=>x.id===id); if(!s)return;
-  document.getElementById('form-sind-titulo').textContent='Editar — '+s.nome;
-  document.getElementById('sind-edit-id').value=s.id;
-  document.getElementById('sind-nome').value=s.nome;
-  document.getElementById('sind-abrangencia').value=s.abrangencia;
-  document.getElementById('sind-database').value=s.database||'';
-  document.getElementById('sind-vr8').value=s.vr8||'';
-  document.getElementById('sind-vr6').value=s.vr6||'';
-  document.getElementById('sind-saude').value=s.saude||'';
-  document.getElementById('sind-vt').value=s.vt||'';
-  document.getElementById('sind-status').value=s.status||'vigente';
-  document.getElementById('sind-erro').style.display='none';
-  document.getElementById('form-sindicato').style.display='block';
-  document.getElementById('sind-nome').focus();
-}
-
-function salvarSindicato() {
-  const nome=(document.getElementById('sind-nome')?.value||'').trim();
-  const abrangencia=(document.getElementById('sind-abrangencia')?.value||'').trim();
-  const vr8=parseFloat(document.getElementById('sind-vr8')?.value)||0;
-  const errEl=document.getElementById('sind-erro');
-  if(!nome){errEl.textContent='Informe o nome do sindicato.';errEl.style.display='block';return;}
-  if(!abrangencia){errEl.textContent='Informe a abrangência.';errEl.style.display='block';return;}
-  if(!vr8){errEl.textContent='Informe o Vale Refeição 8h.';errEl.style.display='block';return;}
-  const editId=document.getElementById('sind-edit-id')?.value;
-  const lista=getSindicatos();
-  const novo={
-    id:editId||'s_'+Date.now(),
-    nome, abrangencia,
-    database:document.getElementById('sind-database')?.value||'',
-    vr8, vr6:parseFloat(document.getElementById('sind-vr6')?.value)||0,
-    saude:parseFloat(document.getElementById('sind-saude')?.value)||0,
-    vt:parseFloat(document.getElementById('sind-vt')?.value)||0,
-    status:document.getElementById('sind-status')?.value||'vigente'
-  };
-  if(editId){
-    const idx=lista.findIndex(x=>x.id===editId);
-    if(idx>-1)lista[idx]=novo; else lista.push(novo);
-  } else {
-    lista.push(novo);
-  }
-  saveSindicatosData(lista);
-  fecharFormSindicato();
-  renderSindicatos();
-}
-
-function excluirSindicato(id) {
-  if(!confirm('Excluir este sindicato?'))return;
-  saveSindicatosData(getSindicatos().filter(s=>s.id!==id));
-  renderSindicatos();
-}
-
-// ── INTEGRAÇÃO: Encargos afeta Fator K ──────────────
-const _calcEquipeOrig = typeof calcEquipe === 'function' ? calcEquipe : null;
-function calcEquipeComEncargos() {
-  // Sobrescreve ENCARGOS global com valor salvo
-  const e = getEncargos();
-  const t=(e.inss+e.sesi+e.senai+e.incra+e.edu+e.fgts+e.sat+e.sebrae+
-    e.ferias+e.adicFerias+e.doenca+e.matern+e.faltas+e.acidente+e.aviso+e.dec13+
-    e.cAviso+e.cFgtsAv+e.cMulta+e.dGps+e.dMulta+e.dIncid+e.eIncid)/100;
-  window._encargosRate = t;
-  if(_calcEquipeOrig) _calcEquipeOrig();
-}
-
-// ── INICIALIZAÇÃO DAS SEÇÕES ─────────────────────────
-// Chamar quando navegar para as páginas
-const _navToOrig2 = navTo;
-navTo = function(page, el) {
-  _navToOrig2(page, el);
-  if(page==='parametros') carregarParametros();
-  if(page==='encargos')   carregarEncargos();
-  if(page==='sindicatos') carregarSindicatos();
-};
-
-// Carregar encargos salvos no startup para usar no Fator K
-(function initExt(){
-  const e=getEncargos();
-  const t=(e.inss+e.sesi+e.senai+e.incra+e.edu+e.fgts+e.sat+e.sebrae+
-    e.ferias+e.adicFerias+e.doenca+e.matern+e.faltas+e.acidente+e.aviso+e.dec13+
-    e.cAviso+e.cFgtsAv+e.cMulta+e.dGps+e.dMulta+e.dIncid+e.eIncid)/100;
-  window._encargosRate = t;
-})();
-</script>
-
-</body></html>');
+  const titulo = document.getElementById('topbar-title').textContent;
+  const w = window.open('','_blank','width=900,height=700');
+  if(!w) return;
+  const get = id => document.getElementById(id)?.textContent || '—';
+  const css = [
+    'body{font-family:system-ui,sans-serif;padding:32px;color:#111;max-width:900px;margin:0 auto}',
+    'h1{color:#c8102e;font-size:20px;margin-bottom:4px}',
+    'h2{font-size:15px;font-weight:600;margin:20px 0 8px;border-bottom:1px solid #ddd;padding-bottom:4px}',
+    'table{width:100%;border-collapse:collapse;margin-bottom:16px;font-size:13px}',
+    'th{padding:7px 10px;background:#f5f5f5;text-align:left;font-size:11px;font-weight:600;color:#666;border:1px solid #ddd}',
+    'td{padding:7px 10px;border:1px solid #ddd}',
+    'td.r{text-align:right;font-family:monospace}',
+    'tr.hl td{font-weight:700;background:#fce8eb}',
+    'footer{margin-top:32px;font-size:11px;color:#999;border-top:1px solid #eee;padding-top:12px}'
+  ].join('');
+  const rows = [
+    ['Custo pessoal/mês', get('mc-pessoal')],
+    ['Investimentos/mês', get('mc-invest')],
+    ['Despesas mensais',  get('mc-despesas')],
+    ['ISS',              get('mc-iss')],
+    ['PIS',              get('mc-pis')],
+    ['COFINS',           get('mc-cofins')],
+    ['Margem líquida',   get('mc-margem')],
+  ];
+  const rowsHtml = rows.map(function(r){ return '<tr><td>'+r[0]+'</td><td class="r">'+r[1]+'</td></tr>'; }).join('');
+  const body = [
+    '<!DOCTYPE html><html><head><meta charset="UTF-8">',
+    '<title>'+titulo+'</title>',
+    '<style>'+css+'</style></head><body>',
+    '<h1>MPricing — Plataforma de Precificação Montreal</h1>',
+    '<p style="color:#666;font-size:13px;margin-top:-8px">'+titulo+' · '+new Date().toLocaleString('pt-BR')+'</p>',
+    '<h2>Composição de Equipe</h2>',
+    document.getElementById('tbl-equipe') ? document.getElementById('tbl-equipe').outerHTML : '<p>Sem dados</p>',
+    '<h2>Precificação</h2><table>',
+    rowsHtml,
+    '<tr class="hl"><td>Preço final/mês</td><td class="r">'+get('preco-final')+'</td></tr>',
+    '<tr class="hl"><td>Valor total do contrato</td><td class="r">'+get('preco-contrato')+'</td></tr>',
+    '</table>',
+    '<footer>MPricing v1.0 · Montreal Informática · Acesso restrito</footer>',
+    '</body></html>'
+  ].join('');
+  w.document.write(body);
   w.document.close();
-  setTimeout(()=>w.print(),600);
+  setTimeout(function(){ w.print(); }, 600);
 }
 
 function enviarAprovacao(){
