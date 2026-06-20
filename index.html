@@ -1220,17 +1220,17 @@ tr.total-row td{font-weight:600;background:var(--surface2);border-top:2px solid 
         <span>Os dados removidos não poderão ser recuperados.</span>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px">
-        <button class="btn" style="justify-content:flex-start;gap:8px" onclick="limparModulo('mpricing_propostas','Propostas')"><i class="ti ti-file-description" style="color:var(--red)"></i>Apagar Propostas</button>
-        <button class="btn" style="justify-content:flex-start;gap:8px" onclick="limparModulo('mpricing_perfis','Perfis')"><i class="ti ti-users" style="color:var(--red)"></i>Apagar Perfis</button>
-        <button class="btn" style="justify-content:flex-start;gap:8px" onclick="limparModulo('mpricing_hardware','Hardware')"><i class="ti ti-device-laptop" style="color:var(--red)"></i>Apagar Hardware</button>
-        <button class="btn" style="justify-content:flex-start;gap:8px" onclick="limparModulo('mpricing_software','Softwares')"><i class="ti ti-apps" style="color:var(--red)"></i>Apagar Softwares</button>
-        <button class="btn" style="justify-content:flex-start;gap:8px" onclick="limparModulo('mpricing_insumos','Insumos')"><i class="ti ti-package" style="color:var(--red)"></i>Apagar Insumos</button>
-        <button class="btn" style="justify-content:flex-start;gap:8px" onclick="limparModulo('mpricing_sindicatos','Sindicatos')"><i class="ti ti-building-community" style="color:var(--red)"></i>Apagar Sindicatos</button>
-        <button class="btn" style="justify-content:flex-start;gap:8px" onclick="limparModulo('mpricing_params','Parametros')"><i class="ti ti-settings-2" style="color:var(--red)"></i>Apagar Parametros</button>
-        <button class="btn" style="justify-content:flex-start;gap:8px" onclick="limparModulo('mpricing_encargos','Encargos')"><i class="ti ti-percentage" style="color:var(--red)"></i>Apagar Encargos</button>
+        <button class="btn" style="justify-content:flex-start;gap:8px" onclick="limparModulo('mpricing_propostas','Propostas',this)"><i class="ti ti-file-description" style="color:var(--red)"></i>Apagar Propostas</button>
+        <button class="btn" style="justify-content:flex-start;gap:8px" onclick="limparModulo('mpricing_perfis','Perfis',this)"><i class="ti ti-users" style="color:var(--red)"></i>Apagar Perfis</button>
+        <button class="btn" style="justify-content:flex-start;gap:8px" onclick="limparModulo('mpricing_hardware','Hardware',this)"><i class="ti ti-device-laptop" style="color:var(--red)"></i>Apagar Hardware</button>
+        <button class="btn" style="justify-content:flex-start;gap:8px" onclick="limparModulo('mpricing_software','Softwares',this)"><i class="ti ti-apps" style="color:var(--red)"></i>Apagar Softwares</button>
+        <button class="btn" style="justify-content:flex-start;gap:8px" onclick="limparModulo('mpricing_insumos','Insumos',this)"><i class="ti ti-package" style="color:var(--red)"></i>Apagar Insumos</button>
+        <button class="btn" style="justify-content:flex-start;gap:8px" onclick="limparModulo('mpricing_sindicatos','Sindicatos',this)"><i class="ti ti-building-community" style="color:var(--red)"></i>Apagar Sindicatos</button>
+        <button class="btn" style="justify-content:flex-start;gap:8px" onclick="limparModulo('mpricing_params','Parametros',this)"><i class="ti ti-settings-2" style="color:var(--red)"></i>Apagar Parametros</button>
+        <button class="btn" style="justify-content:flex-start;gap:8px" onclick="limparModulo('mpricing_encargos','Encargos',this)"><i class="ti ti-percentage" style="color:var(--red)"></i>Apagar Encargos</button>
       </div>
       <div style="border-top:1px solid var(--border);padding-top:16px;display:flex;justify-content:space-between">
-        <button class="btn" style="background:var(--red);color:#fff;border-color:var(--red)" onclick="limparTudo()"><i class="ti ti-trash"></i>Apagar TUDO</button>
+        <button id="btn-apagar-tudo" class="btn" style="background:var(--red);color:#fff;border-color:var(--red)" onclick="limparTudo()"><i class="ti ti-trash"></i>Apagar TUDO</button>
         <button class="btn" onclick="navTo('dashboard',null)"><i class="ti ti-x"></i>Cancelar</button>
       </div>
     </div>
@@ -3158,21 +3158,67 @@ function renderPerfis() {
 
 
 <script>
-function limparModulo(chave, nome) {
-  if(!confirm('Apagar ' + nome + '?')) return;
+function limparModulo(chave, nome, btnEl) {
+  // Sem confirm — botão vira confirmação visual
+  if(btnEl && btnEl.dataset.confirmed !== '1') {
+    btnEl.dataset.confirmed = '1';
+    btnEl.style.background = 'var(--red)';
+    btnEl.style.color = '#fff';
+    btnEl.style.borderColor = 'var(--red)';
+    btnEl.textContent = 'Clique novamente para confirmar';
+    setTimeout(function(){ 
+      if(btnEl.dataset.confirmed === '1') {
+        btnEl.dataset.confirmed = '0';
+        btnEl.style.background = '';
+        btnEl.style.color = '';
+        btnEl.style.borderColor = '';
+        btnEl.innerHTML = btnEl._originalHtml || btnEl.textContent;
+      }
+    }, 3000);
+    return;
+  }
+  // Segunda vez — executar
   localStorage.removeItem(chave);
-  if(chave==='mpricing_params') localStorage.removeItem('mpricing_params_hist');
-  alert(nome + ' apagado! Recarregando...');
-  location.reload();
+  if(chave === 'mpricing_params') localStorage.removeItem('mpricing_params_hist');
+  // Mostrar feedback sem alert
+  if(btnEl) {
+    btnEl.style.background = '#1a6b3a';
+    btnEl.style.color = '#fff';
+    btnEl.textContent = nome + ' apagado!';
+  }
+  // Recarregar após 1.5s
+  setTimeout(function(){ window.location.href = window.location.href; }, 1500);
 }
+
 function limparTudo() {
-  if(!confirm('Apagar TODOS os dados?')) return;
+  var btn = document.getElementById('btn-apagar-tudo');
+  if(btn && btn.dataset.confirmed !== '1') {
+    btn.dataset.confirmed = '1';
+    btn.style.background = '#7a0000';
+    btn.textContent = 'Clique novamente para CONFIRMAR';
+    setTimeout(function(){
+      if(btn.dataset.confirmed === '1') {
+        btn.dataset.confirmed = '0';
+        btn.style.background = 'var(--red)';
+        btn.innerHTML = '<i class="ti ti-trash"></i> Apagar TUDO';
+      }
+    }, 3000);
+    return;
+  }
+  // Executar limpeza
   ['mpricing_propostas','mpricing_perfis','mpricing_hardware','mpricing_software',
    'mpricing_insumos','mpricing_sindicatos','mpricing_params','mpricing_params_hist',
    'mpricing_encargos'].forEach(function(k){ localStorage.removeItem(k); });
-  alert('Tudo apagado! Recarregando...');
-  location.reload();
+  if(btn) { btn.style.background='#1a6b3a'; btn.textContent='Tudo apagado!'; }
+  setTimeout(function(){ window.location.href = window.location.href; }, 1500);
 }
+
+// Guardar HTML original dos botões para restore
+document.addEventListener('DOMContentLoaded', function(){
+  document.querySelectorAll('#page-reset .btn[onclick*=limparModulo]').forEach(function(b){
+    b._originalHtml = b.innerHTML;
+  });
+});
 </script>
 
 </body>
