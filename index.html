@@ -862,6 +862,126 @@ tr.total-row td{font-weight:600;background:var(--surface2);border-top:2px solid 
   </div>
 </div>
 
+<!-- REVISÃO DA PROPOSTA -->
+<div class="page" id="page-revisao">
+  <div style="max-width:800px;margin:0 auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
+      <div>
+        <h2 id="rev-titulo">Revisão da Proposta</h2>
+        <p style="font-size:12px;color:var(--text3);margin-top:2px">Confira todos os dados antes de enviar para aprovação</p>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn" onclick="exportarPDF()"><i class="ti ti-download"></i> Exportar PDF</button>
+        <button class="btn btn-primary" onclick="enviarAprovacao()"><i class="ti ti-send"></i> Enviar para aprovação</button>
+      </div>
+    </div>
+
+    <!-- Identificação -->
+    <div class="card" style="margin-bottom:16px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+        <div style="width:36px;height:36px;background:var(--accent-bg);border-radius:8px;display:flex;align-items:center;justify-content:center"><i class="ti ti-file-description" style="font-size:18px;color:#c8102e"></i></div>
+        <h3>Identificação</h3>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+        <div><div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Número</div><div style="font-size:15px;font-weight:700;color:#c8102e" id="rev-numero">—</div></div>
+        <div><div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Cliente</div><div style="font-size:13px;font-weight:600" id="rev-cliente">—</div></div>
+        <div><div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Processo</div><div style="font-size:13px" id="rev-processo">—</div></div>
+        <div><div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Prazo</div><div style="font-size:13px" id="rev-prazo">—</div></div>
+        <div><div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Município</div><div style="font-size:13px" id="rev-municipio">—</div></div>
+        <div><div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Tipo</div><div style="font-size:13px" id="rev-tipo">—</div></div>
+      </div>
+    </div>
+
+    <!-- Resumo financeiro -->
+    <div class="grid g4" style="margin-bottom:16px">
+      <div class="metric accent"><div class="metric-label">Custo Mensal</div><div class="metric-value" id="rev-custo-mes">R$ 0,00</div></div>
+      <div class="metric green"><div class="metric-label">Preço Final/Mês</div><div class="metric-value" id="rev-preco-mes">R$ 0,00</div></div>
+      <div class="metric amber"><div class="metric-label">Margem Líquida</div><div class="metric-value" id="rev-margem-pct">0,0%</div></div>
+      <div class="metric"><div class="metric-label">Valor do Contrato</div><div class="metric-value" id="rev-contrato">R$ 0,00</div></div>
+    </div>
+
+    <!-- Equipe -->
+    <div class="card" style="margin-bottom:16px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+        <div style="width:36px;height:36px;background:#e6f4ec;border-radius:8px;display:flex;align-items:center;justify-content:center"><i class="ti ti-users" style="font-size:18px;color:var(--green)"></i></div>
+        <h3>Composição de Equipe</h3>
+      </div>
+      <div id="rev-equipe-resumo">
+        <p style="color:var(--text3);font-size:13px">Nenhum perfil adicionado.</p>
+      </div>
+    </div>
+
+    <!-- Custos detalhados -->
+    <div class="grid g2" style="margin-bottom:16px">
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+          <div style="width:32px;height:32px;background:var(--amber-bg);border-radius:8px;display:flex;align-items:center;justify-content:center"><i class="ti ti-calculator" style="font-size:16px;color:var(--amber)"></i></div>
+          <h3>Composição de Custos</h3>
+        </div>
+        <div style="display:grid;gap:4px" id="rev-custos-detalhe">
+          <div class="calc-row"><span class="calc-label">Salários</span><span class="calc-val" id="rev-salarios">R$ 0,00</span></div>
+          <div class="calc-row"><span class="calc-label">Encargos trabalhistas</span><span class="calc-val" id="rev-encargos">R$ 0,00</span></div>
+          <div class="calc-row"><span class="calc-label">Benefícios (VT + VR)</span><span class="calc-val" id="rev-beneficios">R$ 0,00</span></div>
+          <div class="calc-row"><span class="calc-label">Plano saúde + odonto</span><span class="calc-val" id="rev-saude">R$ 0,00</span></div>
+          <div class="calc-row"><span class="calc-label">Investimentos</span><span class="calc-val" id="rev-invest">R$ 0,00</span></div>
+          <div class="calc-row"><span class="calc-label">Despesas mensais</span><span class="calc-val" id="rev-despesas">R$ 0,00</span></div>
+          <div class="calc-row subtotal"><span class="calc-label">Custo total/mês</span><span class="calc-val" id="rev-custo-total">R$ 0,00</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+          <div style="width:32px;height:32px;background:var(--accent-bg);border-radius:8px;display:flex;align-items:center;justify-content:center"><i class="ti ti-receipt-tax" style="font-size:16px;color:#c8102e"></i></div>
+          <h3>Impostos e Resultado</h3>
+        </div>
+        <div style="display:grid;gap:4px">
+          <div class="calc-row"><span class="calc-label">ISS</span><span class="calc-val" id="rev-iss">R$ 0,00</span></div>
+          <div class="calc-row"><span class="calc-label">PIS</span><span class="calc-val" id="rev-pis">R$ 0,00</span></div>
+          <div class="calc-row"><span class="calc-label">COFINS</span><span class="calc-val" id="rev-cofins">R$ 0,00</span></div>
+          <div class="calc-row subtotal"><span class="calc-label">Total impostos</span><span class="calc-val" id="rev-imp-total">R$ 0,00</span></div>
+          <div class="calc-row"><span class="calc-label">Comissão</span><span class="calc-val" id="rev-comissao">R$ 0,00</span></div>
+          <div class="calc-row"><span class="calc-label">Margem líquida</span><span class="calc-val" id="rev-margem-val">R$ 0,00</span></div>
+          <div class="calc-row total"><span class="calc-label">Preço final/mês</span><span class="calc-val" id="rev-preco-final">R$ 0,00</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Premissas e observações -->
+    <div class="card">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+        <div style="width:32px;height:32px;background:var(--surface2);border-radius:8px;display:flex;align-items:center;justify-content:center"><i class="ti ti-notes" style="font-size:16px;color:var(--text2)"></i></div>
+        <h3>Premissas Comerciais</h3>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Observações e premissas da proposta</label>
+          <textarea id="rev-obs" rows="4" placeholder="Descreva as premissas, condições especiais ou observações relevantes para esta proposta..."></textarea>
+        </div>
+      </div>
+      <div class="form-row cols2">
+        <div class="form-group">
+          <label>Validade da proposta</label>
+          <select id="rev-validade">
+            <option>30 dias</option>
+            <option>45 dias</option>
+            <option>60 dias</option>
+            <option>90 dias</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Condição de pagamento</label>
+          <select id="rev-pagamento">
+            <option>Mensal — dia 10</option>
+            <option>Mensal — dia 15</option>
+            <option>Mensal — dia 20</option>
+            <option>Mensal — dia 30</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
     </div>
   </div>
 </div>
@@ -1015,28 +1135,48 @@ function abrirUsuarios() {
 }
 
 function renderListaUsuarios() {
-  const users=getUsers();
-  const c=document.getElementById('lista-usuarios-container');
-  if(!c)return;
-  c.innerHTML='<p style="font-size:12px;font-weight:600;margin-bottom:10px">Usuários ('+users.length+')</p>'+
-    '<table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr>'+
-    '<th style="padding:8px 10px;text-align:left;font-size:11px;font-weight:600;color:#9c9a92;border-bottom:1px solid #e2e0d8">Usuário</th>'+
-    '<th style="padding:8px 10px;text-align:left;font-size:11px;font-weight:600;color:#9c9a92;border-bottom:1px solid #e2e0d8">Nome</th>'+
-    '<th style="padding:8px 10px;text-align:left;font-size:11px;font-weight:600;color:#9c9a92;border-bottom:1px solid #e2e0d8">Perfil</th>'+
-    '<th style="padding:8px 10px;text-align:left;font-size:11px;font-weight:600;color:#9c9a92;border-bottom:1px solid #e2e0d8">Status</th>'+
-    '<th style="padding:8px 10px;border-bottom:1px solid #e2e0d8"></th></tr></thead><tbody>'+
-    users.map(u=>{
-      const pf=PERFIS_MAP[u.perfil]||PERFIS_MAP.leitor;
-      const isMaster=u.username==='admin';
-      return '<tr style="border-bottom:1px solid #f1f0ec">'+
-        '<td style="padding:9px 10px;font-family:monospace;font-size:12px">'+u.username+'</td>'+
-        '<td style="padding:9px 10px">'+u.nome+'</td>'+
-        '<td style="padding:9px 10px"><span style="background:'+pf.cor+'18;color:'+pf.cor+';font-size:11px;padding:2px 8px;border-radius:99px">'+pf.label+'</span></td>'+
-        '<td style="padding:9px 10px;font-size:12px;color:'+(u.ativo?'#1a6b3a':'#a32020')+'">'+(u.ativo?'● Ativo':'○ Inativo')+'</td>'+
-        '<td style="padding:9px 10px;text-align:right">'+(isMaster?'<span style="font-size:11px;color:#9c9a92">master</span>':
-          '<button onclick="toggleAtivoUser(\''+u.id+'\')" style="background:none;border:1px solid #e2e0d8;border-radius:6px;padding:3px 8px;cursor:pointer;font-size:11px;color:#6b6860;margin-right:4px;font-family:inherit">'+(u.ativo?'Desativar':'Ativar')+'</button>'+
-          '<button onclick="resetarSenha(\''+u.id+'\')" style="background:none;border:1px solid #e2e0d8;border-radius:6px;padding:3px 8px;cursor:pointer;font-size:11px;color:#6b6860;font-family:inherit">Reset</button>')+'</td></tr>';
-    }).join('')+'</tbody></table>';
+  const users = getUsers();
+  const c = document.getElementById('lista-usuarios-container');
+  if(!c) return;
+  const perfis = PERFIS_MAP;
+  let rows = '';
+  users.forEach(function(u) {
+    const pf = perfis[u.perfil] || perfis.leitor;
+    const isMaster = u.username === 'admin';
+    rows += '<tr style="border-bottom:1px solid #f1f0ec">' +
+      '<td style="padding:9px 10px;font-family:monospace;font-size:12px">'+u.username+'</td>' +
+      '<td style="padding:9px 10px">'+u.nome+'</td>' +
+      '<td style="padding:9px 10px"><span style="background:'+pf.cor+'18;color:'+pf.cor+';font-size:11px;padding:2px 8px;border-radius:99px">'+pf.label+'</span></td>' +
+      '<td style="padding:9px 10px;font-size:12px;color:'+(u.ativo?'#1a6b3a':'#a32020')+'">'+(u.ativo?'● Ativo':'○ Inativo')+'</td>' +
+      '<td style="padding:9px 10px;text-align:right" data-uid="'+u.id+'" class="td-usr-actions">' +
+        (isMaster ? '<span style="font-size:11px;color:#9c9a92">master</span>' : '') +
+      '</td>' +
+    '</tr>';
+  });
+  c.innerHTML = '<p style="font-size:12px;font-weight:600;margin-bottom:10px">Usuários ('+users.length+')</p>' +
+    '<table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr>' +
+    '<th style="padding:8px 10px;text-align:left;font-size:11px;font-weight:600;color:#9c9a92;border-bottom:1px solid #e2e0d8">Usuário</th>' +
+    '<th style="padding:8px 10px;text-align:left;font-size:11px;font-weight:600;color:#9c9a92;border-bottom:1px solid #e2e0d8">Nome</th>' +
+    '<th style="padding:8px 10px;text-align:left;font-size:11px;font-weight:600;color:#9c9a92;border-bottom:1px solid #e2e0d8">Perfil</th>' +
+    '<th style="padding:8px 10px;text-align:left;font-size:11px;font-weight:600;color:#9c9a92;border-bottom:1px solid #e2e0d8">Status</th>' +
+    '<th style="padding:8px 10px;border-bottom:1px solid #e2e0d8"></th>' +
+    '</tr></thead><tbody>'+rows+'</tbody></table>';
+  // Adicionar botões via JS para evitar aspas aninhadas
+  c.querySelectorAll('.td-usr-actions').forEach(function(td) {
+    const uid = td.dataset.uid;
+    const user = users.find(function(u){ return u.id === uid; });
+    if(!user || user.username === 'admin') return;
+    const btnAtivo = document.createElement('button');
+    btnAtivo.style.cssText = 'background:none;border:1px solid #e2e0d8;border-radius:6px;padding:3px 8px;cursor:pointer;font-size:11px;color:#6b6860;margin-right:4px;font-family:inherit';
+    btnAtivo.textContent = user.ativo ? 'Desativar' : 'Ativar';
+    btnAtivo.addEventListener('click', function(){ toggleAtivoUser(uid); });
+    const btnReset = document.createElement('button');
+    btnReset.style.cssText = 'background:none;border:1px solid #e2e0d8;border-radius:6px;padding:3px 8px;cursor:pointer;font-size:11px;color:#6b6860;font-family:inherit';
+    btnReset.textContent = 'Reset senha';
+    btnReset.addEventListener('click', function(){ resetarSenha(uid); });
+    td.appendChild(btnAtivo);
+    td.appendChild(btnReset);
+  });
 }
 
 async function adicionarUsuario() {
@@ -1227,6 +1367,7 @@ function calcEquipe(){
   });
   document.getElementById('tot-qtde').innerHTML='<strong>'+totQtde+'</strong>';
   document.getElementById('tot-mensal').innerHTML='<strong>'+fmt(totMensal)+'</strong>';
+  window._custoEquipeMensal = totMensal;
   // Resumo benefícios
   const rb=document.getElementById('resumo-beneficios');
   if(rb&&totQtde>0){
@@ -1263,16 +1404,48 @@ function addPerfil(){
 
 // ── INVESTIMENTOS ─────────────────────────────────────
 function addInvRow(tbodyId){
-  const tbody=document.getElementById(tbodyId); if(!tbody)return;
+  const tbody=document.getElementById(tbodyId);
+  if(!tbody)return;
   const tr=document.createElement('tr');
-  tr.innerHTML='<td><input type="text" placeholder="Descrição" style="width:100%;min-width:120px"></td>'+
-    '<td><input type="number" value="1" min="0" style="width:55px" oninput="recalcInv(\''+tbodyId+'\')"></td>'+
-    '<td><input type="number" value="0" min="0" style="width:90px" oninput="recalcInv(\''+tbodyId+'\')"></td>'+
-    '<td><input type="number" value="60" min="1" style="width:60px" oninput="recalcInv(\''+tbodyId+'\')"></td>'+
-    '<td class="num">R$ 0,00</td>'+
-    '<td><button class="btn btn-sm btn-ghost" style="color:var(--red)" onclick="this.closest(\'tr\').remove();recalcInv(\''+tbodyId+'\')"><i class="ti ti-trash"></i></button></td>';
+  const inp = function(type,val,w,ev){
+    const i=document.createElement('input');
+    i.type=type; i.value=val; i.style.cssText='width:'+w+'px;padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px';
+    if(ev) i.addEventListener('input',function(){ recalcInv(tbodyId); });
+    return i;
+  };
+  const tdDesc=document.createElement('td');
+  const inpDesc=document.createElement('input');
+  inpDesc.type='text'; inpDesc.placeholder='Descrição';
+  inpDesc.style.cssText='width:100%;min-width:120px;padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px';
+  tdDesc.appendChild(inpDesc);
+
+  const tdQtd=document.createElement('td');
+  const inpQtd=inp('number','1',55,true);
+  tdQtd.appendChild(inpQtd);
+
+  const tdVal=document.createElement('td');
+  const inpVal=inp('number','0',90,true);
+  tdVal.appendChild(inpVal);
+
+  const tdDep=document.createElement('td');
+  const inpDep=inp('number','60',60,true);
+  tdDep.appendChild(inpDep);
+
+  const tdNum=document.createElement('td');
+  tdNum.className='num'; tdNum.textContent='R$ 0,00';
+
+  const tdAct=document.createElement('td');
+  const btnDel=document.createElement('button');
+  btnDel.className='btn btn-sm btn-ghost';
+  btnDel.style.color='var(--red)';
+  btnDel.innerHTML='<i class="ti ti-trash"></i>';
+  btnDel.addEventListener('click',function(){ tr.remove(); recalcInv(tbodyId); });
+  tdAct.appendChild(btnDel);
+
+  tr.appendChild(tdDesc); tr.appendChild(tdQtd); tr.appendChild(tdVal);
+  tr.appendChild(tdDep); tr.appendChild(tdNum); tr.appendChild(tdAct);
   tbody.appendChild(tr);
-  recalcInv(tbodyId);
+  inpDesc.focus();
 }
 
 function recalcInv(tbodyId){
@@ -1293,22 +1466,57 @@ function recalcInv(tbodyId){
   // total geral
   const eTotal=parseFloat((document.getElementById('inv-equip-total')?.textContent||'0').replace(/[^0-9,]/g,'').replace(',','.'));
   const sTotal=parseFloat((document.getElementById('inv-sw-total')?.textContent||'0').replace(/[^0-9,]/g,'').replace(',','.'));
+  const gTotal = eTotal+sTotal;
   const resT=document.getElementById('inv-res-total');
-  if(resT)resT.textContent=fmt(eTotal+sTotal);
+  if(resT)resT.textContent=fmt(gTotal);
+  window._custoInvestMensal = gTotal;
   setTimeout(calcPreco,50);
 }
 
 // ── DESPESAS ─────────────────────────────────────────
 function addDesp(tbodyId){
-  const tbody=document.getElementById(tbodyId); if(!tbody)return;
-  const empty=tbody.querySelector('td[colspan]'); if(empty)empty.closest('tr').remove();
+  const tbody=document.getElementById(tbodyId);
+  if(!tbody)return;
+  // Remover placeholder vazio
+  const empty=tbody.querySelector('td[colspan]');
+  if(empty) empty.closest('tr').remove();
+
   const tr=document.createElement('tr');
-  tr.innerHTML='<td><input type="text" placeholder="Descrição" style="width:100%;min-width:120px"></td>'+
-    '<td><input type="number" value="1" min="0" style="width:55px" oninput="recalcDesp(\''+tbodyId+'\')"></td>'+
-    '<td><input type="number" value="0" min="0" style="width:90px" oninput="recalcDesp(\''+tbodyId+'\')"></td>'+
-    '<td class="num">R$ 0,00</td>'+
-    '<td><button class="btn btn-sm btn-ghost" style="color:var(--red)" onclick="this.closest(\'tr\').remove();recalcDesp(\''+tbodyId+'\')"><i class="ti ti-trash"></i></button></td>';
+  const mkInp=function(type,val,w,ev){
+    const i=document.createElement('input');
+    i.type=type; i.value=val;
+    i.style.cssText='width:'+w+'px;padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px';
+    if(ev) i.addEventListener('input',function(){ recalcDesp(tbodyId); });
+    return i;
+  };
+
+  const tdDesc=document.createElement('td');
+  const inpDesc=document.createElement('input');
+  inpDesc.type='text'; inpDesc.placeholder='Descrição';
+  inpDesc.style.cssText='width:100%;min-width:120px;padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px';
+  tdDesc.appendChild(inpDesc);
+
+  const tdQtd=document.createElement('td');
+  tdQtd.appendChild(mkInp('number','1',55,true));
+
+  const tdVal=document.createElement('td');
+  tdVal.appendChild(mkInp('number','0',90,true));
+
+  const tdNum=document.createElement('td');
+  tdNum.className='num'; tdNum.textContent='R$ 0,00';
+
+  const tdAct=document.createElement('td');
+  const btnDel=document.createElement('button');
+  btnDel.className='btn btn-sm btn-ghost';
+  btnDel.style.color='var(--red)';
+  btnDel.innerHTML='<i class="ti ti-trash"></i>';
+  btnDel.addEventListener('click',function(){ tr.remove(); recalcDesp(tbodyId); });
+  tdAct.appendChild(btnDel);
+
+  tr.appendChild(tdDesc); tr.appendChild(tdQtd); tr.appendChild(tdVal);
+  tr.appendChild(tdNum); tr.appendChild(tdAct);
   tbody.appendChild(tr);
+  inpDesc.focus();
 }
 
 function recalcDesp(tbodyId){
@@ -1328,15 +1536,21 @@ function recalcDesp(tbodyId){
   if(resEl)resEl.textContent=fmt(total);
   const lTotal=parseFloat((document.getElementById('desp-loc-total')?.textContent||'0').replace(/[^0-9,]/g,'').replace(',','.'));
   const eTotal=parseFloat((document.getElementById('desp-eq-total')?.textContent||'0').replace(/[^0-9,]/g,'').replace(',','.'));
+  const dTotal = lTotal+eTotal;
   const resT=document.getElementById('desp-res-total');
-  if(resT)resT.textContent=fmt(lTotal+eTotal);
+  if(resT)resT.textContent=fmt(dTotal);
+  window._custoDespMensal = dTotal;
   setTimeout(calcPreco,50);
 }
 
 // ── PRECIFICAÇÃO ──────────────────────────────────────
 function getNumFromEl(id){
-  const el=document.getElementById(id); if(!el)return 0;
-  return parseFloat(el.textContent.replace(/[^0-9,]/g,'').replace('.','').replace(',','.'))||0;
+  const el=document.getElementById(id);
+  if(!el) return 0;
+  // Pegar texto puro, remover R$, espaços e pontos de milhar, trocar vírgula decimal por ponto
+  const txt = el.textContent || el.innerText || '0';
+  const clean = txt.replace(/[^0-9,]/g,'').replace(/\./g,'').replace(',','.');
+  return parseFloat(clean) || 0;
 }
 
 function calcPreco(){
@@ -1347,15 +1561,12 @@ function calcPreco(){
   const mg     =(parseFloat(document.getElementById('margem')?.value)||10)/100;
   const prazo  = parseInt(document.getElementById('prazo')?.value)||24;
 
-  const custoPes = getNumFromEl('tot-mensal');
-  // Investimentos
-  const invEl=document.getElementById('inv-res-total');
-  const custInv=invEl?parseFloat(invEl.textContent.replace(/[^0-9,]/g,'').replace(',','.'))||0:0;
-  // Despesas
-  const despEl=document.getElementById('desp-res-total');
-  const custDesp=despEl?parseFloat(despEl.textContent.replace(/[^0-9,]/g,'').replace(',','.'))||0:0;
+  // Usar variável global atualizada por calcEquipe
+  const custoPes = window._custoEquipeMensal || getNumFromEl('tot-mensal');
+  const custInv  = window._custoInvestMensal || getNumFromEl('inv-res-total');
+  const custDesp = window._custoDespMensal   || getNumFromEl('desp-res-total');
 
-  const custoTotal=custoPes+custInv+custDesp;
+  custoTotal=custoPes+custInv+custDesp;
   const impostos=iss+pis+cofins;
   const div=1-impostos-comiss-mg;
   if(div<=0)return;
@@ -1383,48 +1594,38 @@ function calcPreco(){
 
 // ── EXPORTAR PDF ──────────────────────────────────────
 function exportarPDF(){
-  const titulo = document.getElementById('topbar-title').textContent;
-  const w = window.open('','_blank','width=900,height=700');
+  const w=window.open('','_blank');
   if(!w) return;
-  const get = id => document.getElementById(id)?.textContent || '—';
-  const css = [
-    'body{font-family:system-ui,sans-serif;padding:32px;color:#111;max-width:900px;margin:0 auto}',
-    'h1{color:#c8102e;font-size:20px;margin-bottom:4px}',
-    'h2{font-size:15px;font-weight:600;margin:20px 0 8px;border-bottom:1px solid #ddd;padding-bottom:4px}',
-    'table{width:100%;border-collapse:collapse;margin-bottom:16px;font-size:13px}',
-    'th{padding:7px 10px;background:#f5f5f5;text-align:left;font-size:11px;font-weight:600;color:#666;border:1px solid #ddd}',
-    'td{padding:7px 10px;border:1px solid #ddd}',
-    'td.r{text-align:right;font-family:monospace}',
-    'tr.hl td{font-weight:700;background:#fce8eb}',
-    'footer{margin-top:32px;font-size:11px;color:#999;border-top:1px solid #eee;padding-top:12px}'
-  ].join('');
-  const rows = [
+  const titulo = document.getElementById('topbar-title')?.textContent||'Proposta';
+  const get = function(id){ return document.getElementById(id)?.textContent||'—'; };
+  let tblHtml = '';
+  const tbl = document.getElementById('tbl-equipe');
+  if(tbl) tblHtml = tbl.outerHTML;
+  const linhas = [
     ['Custo pessoal/mês', get('mc-pessoal')],
     ['Investimentos/mês', get('mc-invest')],
     ['Despesas mensais',  get('mc-despesas')],
-    ['ISS',              get('mc-iss')],
-    ['PIS',              get('mc-pis')],
-    ['COFINS',           get('mc-cofins')],
-    ['Margem líquida',   get('mc-margem')],
+    ['ISS',               get('mc-iss')],
+    ['PIS',               get('mc-pis')],
+    ['COFINS',            get('mc-cofins')],
+    ['Margem líquida',    get('mc-margem')],
   ];
-  const rowsHtml = rows.map(function(r){ return '<tr><td>'+r[0]+'</td><td class="r">'+r[1]+'</td></tr>'; }).join('');
-  const body = [
-    '<!DOCTYPE html><html><head><meta charset="UTF-8">',
-    '<title>'+titulo+'</title>',
-    '<style>'+css+'</style></head><body>',
-    '<h1>MPricing — Plataforma de Precificação Montreal</h1>',
-    '<p style="color:#666;font-size:13px;margin-top:-8px">'+titulo+' · '+new Date().toLocaleString('pt-BR')+'</p>',
-    '<h2>Composição de Equipe</h2>',
-    document.getElementById('tbl-equipe') ? document.getElementById('tbl-equipe').outerHTML : '<p>Sem dados</p>',
-    '<h2>Precificação</h2><table>',
-    rowsHtml,
-    '<tr class="hl"><td>Preço final/mês</td><td class="r">'+get('preco-final')+'</td></tr>',
-    '<tr class="hl"><td>Valor total do contrato</td><td class="r">'+get('preco-contrato')+'</td></tr>',
-    '</table>',
-    '<footer>MPricing v1.0 · Montreal Informática · Acesso restrito</footer>',
-    '</body></html>'
-  ].join('');
-  w.document.write(body);
+  let trs = '';
+  linhas.forEach(function(r){ trs += '<tr><td>'+r[0]+'</td><td style="text-align:right;font-family:monospace">'+r[1]+'</td></tr>'; });
+  trs += '<tr style="font-weight:700;background:#fce8eb"><td>Preço final/mês</td><td style="text-align:right">'+get('preco-final')+'</td></tr>';
+  trs += '<tr style="font-weight:700;background:#fce8eb"><td>Valor total do contrato</td><td style="text-align:right">'+get('preco-contrato')+'</td></tr>';
+  const stl = 'body{font-family:system-ui;padding:32px;max-width:900px;margin:0 auto}h1{color:#c8102e;font-size:20px}h2{font-size:15px;font-weight:600;margin:20px 0 8px;border-bottom:1px solid #ddd;padding-bottom:4px}table{width:100%;border-collapse:collapse;font-size:13px}th{padding:7px 10px;background:#f5f5f5;text-align:left;font-size:11px;border:1px solid #ddd}td{padding:7px 10px;border:1px solid #ddd}footer{margin-top:32px;font-size:11px;color:#999;border-top:1px solid #eee;padding-top:12px}';
+  w.document.open();
+  w.document.write('<!DOCTYPE html>');
+  w.document.write('<html><head><meta charset="UTF-8"><title>'+titulo+'</title>');
+  w.document.write('<style>'+stl+'</style>');
+  w.document.write('</head><body>');
+  w.document.write('<h1>MPricing — Montreal</h1>');
+  w.document.write('<p style="color:#666;font-size:13px">'+titulo+' — '+new Date().toLocaleString('pt-BR')+'</p>');
+  w.document.write('<h2>Equipe</h2>'+tblHtml);
+  w.document.write('<h2>Precificação</h2><table>'+trs+'</table>');
+  w.document.write('<footer>MPricing v1.0 — Montreal Informática</footer>');
+  w.document.write('</body></html>');
   w.document.close();
   setTimeout(function(){ w.print(); }, 600);
 }
@@ -1708,28 +1909,45 @@ function renderSindicatos() {
   const lista = getSindicatos();
   const tbody = document.getElementById('sindicatos-body');
   const vazio = document.getElementById('sindicatos-vazio');
-  if(!tbody)return;
-  tbody.innerHTML='';
-  if(!lista.length){ if(vazio)vazio.style.display='block'; return; }
-  if(vazio)vazio.style.display='none';
-  const fmtR = v => v?'R$ '+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}):'—';
+  if(!tbody) return;
+  tbody.innerHTML = '';
+  if(!lista.length) { if(vazio) vazio.style.display='block'; return; }
+  if(vazio) vazio.style.display='none';
+  const fmtR = function(v){ return v ? 'R$ '+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) : '—'; };
   const statusMap = {vigente:['badge-green','Vigente'],expirado:['badge-red','Expirado'],negociacao:['badge-amber','Em negociação']};
-  lista.forEach(s=>{
-    const [bc,sl]=statusMap[s.status]||statusMap.vigente;
-    const dbFormatado = s.database ? (() => {const [y,m]=s.database.split('-');const meses=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];return (meses[parseInt(m)-1]||m)+'/'+y;})() : '—';
-    const tr=document.createElement('tr');
-    tr.innerHTML='<td><strong>'+s.nome+'</strong></td>'+
+  lista.forEach(function(s) {
+    const stArr = statusMap[s.status] || statusMap.vigente;
+    const bc = stArr[0]; const sl = stArr[1];
+    let dbF = '—';
+    if(s.database) {
+      const parts = s.database.split('-');
+      const meses = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+      dbF = (meses[parseInt(parts[1])-1]||parts[1]) + '/' + parts[0];
+    }
+    const tr = document.createElement('tr');
+    tr.innerHTML = '<td><strong>'+s.nome+'</strong></td>'+
       '<td style="font-size:13px">'+s.abrangencia+'</td>'+
-      '<td style="font-size:13px">'+dbFormatado+'</td>'+
+      '<td style="font-size:13px">'+dbF+'</td>'+
       '<td class="num">'+fmtR(s.vr8)+'/dia</td>'+
       '<td class="num">'+fmtR(s.vr6)+'/dia</td>'+
       '<td class="num">'+fmtR(s.saude)+'/mês</td>'+
       '<td class="num">'+fmtR(s.vt)+'/dia</td>'+
       '<td><span class="badge '+bc+'">'+sl+'</span></td>'+
-      '<td><div class="td-action">'+
-        '<button class="btn btn-sm btn-ghost" onclick="editarSindicato(''+s.id+'')" title="Editar"><i class="ti ti-edit"></i></button>'+
-        '<button class="btn btn-sm btn-ghost" style="color:var(--red)" onclick="excluirSindicato(''+s.id+'')" title="Excluir"><i class="ti ti-trash"></i></button>'+
-      '</div></td>';
+      '<td><div class="td-action"></div></td>';
+    const tdAct = tr.querySelector('.td-action');
+    const btnEdit = document.createElement('button');
+    btnEdit.className = 'btn btn-sm btn-ghost';
+    btnEdit.title = 'Editar';
+    btnEdit.innerHTML = '<i class="ti ti-edit"></i>';
+    btnEdit.addEventListener('click', function(){ editarSindicato(s.id); });
+    const btnDel = document.createElement('button');
+    btnDel.className = 'btn btn-sm btn-ghost';
+    btnDel.style.color = 'var(--red)';
+    btnDel.title = 'Excluir';
+    btnDel.innerHTML = '<i class="ti ti-trash"></i>';
+    btnDel.addEventListener('click', function(){ excluirSindicato(s.id); });
+    tdAct.appendChild(btnEdit);
+    tdAct.appendChild(btnDel);
     tbody.appendChild(tr);
   });
 }
@@ -1833,6 +2051,197 @@ navTo = function(page, el) {
     e.cAviso+e.cFgtsAv+e.cMulta+e.dGps+e.dMulta+e.dIncid+e.eIncid)/100;
   window._encargosRate = t;
 })();
+</script>
+
+
+<script>
+// ═══════════════════════════════════════════════
+//  MPricing — Revisão e navegação de abas
+// ═══════════════════════════════════════════════
+
+// Navegar para aba da composição E atualizar stepper
+function irParaAba(aba) {
+  // abas: equipe, beneficios, investimento, despesas, preco, revisao
+  const tabMap = {
+    'equipe':      {tab:'tab-equipe',      btn:0},
+    'beneficios':  {tab:'tab-beneficios',  btn:1},
+    'investimento':{tab:'tab-investimento',btn:2},
+    'despesas':    {tab:'tab-despesas',    btn:3},
+    'preco':       {tab:'tab-preco',       btn:4},
+  };
+
+  if(aba === 'revisao') {
+    // Preencher dados na revisão antes de navegar
+    preencherRevisao();
+    navTo('revisao', null);
+    return;
+  }
+
+  const info = tabMap[aba];
+  if(!info) return;
+
+  // Garantir que page-nova está ativa
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const pNova = document.getElementById('page-nova');
+  if(pNova) pNova.classList.add('active');
+
+  // Ativar a aba correta
+  const tabs = document.querySelectorAll('#page-nova .tab');
+  tabs.forEach((t, i) => t.classList.toggle('active', i === info.btn));
+
+  const contents = ['tab-equipe','tab-beneficios','tab-investimento','tab-despesas','tab-preco'];
+  contents.forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.style.display = (id === info.tab) ? 'block' : 'none';
+  });
+}
+
+// Preencher página de revisão com dados atuais
+function preencherRevisao() {
+  const topTitle = document.getElementById('topbar-title')?.textContent || '';
+  document.getElementById('rev-titulo').textContent = 'Revisão — ' + topTitle;
+
+  // Dados da proposta ativa
+  const props = getPropostas();
+  const prop = props.find(p => p.id === window._propostaAtiva) || props[0] || {};
+  if(prop.numero) document.getElementById('rev-numero').textContent = prop.numero;
+  if(prop.cliente) document.getElementById('rev-cliente').textContent = prop.cliente;
+  if(prop.processo) document.getElementById('rev-processo').textContent = prop.processo || '—';
+  if(prop.prazo) document.getElementById('rev-prazo').textContent = prop.prazo + ' meses';
+  if(prop.municipio) document.getElementById('rev-municipio').textContent = prop.municipio || '—';
+  if(prop.tipo) document.getElementById('rev-tipo').textContent = prop.tipo || '—';
+
+  // Valores calculados — ler das variáveis globais
+  const custoPes  = window._custoEquipeMensal || 0;
+  const custInv   = window._custoInvestMensal || 0;
+  const custDesp  = window._custoDespMensal || 0;
+  const custoTotal = custoPes + custInv + custDesp;
+
+  const iss    = (parseFloat(document.getElementById('iss')?.value) || 3.4) / 100;
+  const pis    = (parseFloat(document.getElementById('pis')?.value) || 0.65) / 100;
+  const cofins = (parseFloat(document.getElementById('cofins')?.value) || 3.0) / 100;
+  const comiss = (parseFloat(document.getElementById('comissao')?.value) || 0) / 100;
+  const mg     = (parseFloat(document.getElementById('margem')?.value) || 10) / 100;
+  const prazo  = parseInt(document.getElementById('prazo')?.value) || 24;
+
+  const div = 1 - iss - pis - cofins - comiss - mg;
+  const preco = div > 0 ? custoTotal / div : 0;
+  const precoContrato = preco * prazo;
+  const margemPct = preco > 0 ? (preco * mg / preco * 100) : 0;
+
+  const enc = window._encargosRate || 0.697;
+  const params = getParams();
+  const dias = params.dias || 22;
+
+  // Calcular componentes de custo
+  let salTotal = 0, encTotal = 0, vtTotal = 0, vrTotal = 0, saudeTotal = 0, qtdeTotal = 0;
+  document.querySelectorAll('#equipe-body tr').forEach(tr => {
+    const nums = tr.querySelectorAll('input[type=number]');
+    if(nums.length < 2) return;
+    const qtde = parseFloat(nums[0].value) || 0;
+    const sal  = parseFloat(nums[1].value) || 0;
+    qtdeTotal += qtde;
+    salTotal  += sal * qtde;
+    encTotal  += sal * enc * qtde;
+    vtTotal   += (params.vt || 35) * dias * qtde;
+    vrTotal   += (params.vr8 || 35) * dias * qtde;
+    saudeTotal+= ((params.saude || 385) + (params.odonto || 21.21)) * qtde;
+  });
+
+  const s = id => { const el = document.getElementById(id); if(el) el.textContent = fmtBR(arguments[1]); };
+  // Usar forma direta
+  const setV = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = fmtBR(v); };
+  setV('rev-salarios',   salTotal);
+  setV('rev-encargos',   encTotal);
+  setV('rev-beneficios', vtTotal + vrTotal);
+  setV('rev-saude',      saudeTotal);
+  setV('rev-invest',     custInv);
+  setV('rev-despesas',   custDesp);
+  setV('rev-custo-total',custoTotal);
+  setV('rev-iss',        preco * iss);
+  setV('rev-pis',        preco * pis);
+  setV('rev-cofins',     preco * cofins);
+  setV('rev-imp-total',  preco * (iss+pis+cofins));
+  setV('rev-comissao',   preco * comiss);
+  setV('rev-margem-val', preco * mg);
+  setV('rev-preco-final',preco);
+  setV('rev-custo-mes',  custoTotal);
+  setV('rev-preco-mes',  preco);
+  setV('rev-contrato',   precoContrato);
+
+  const mgEl = document.getElementById('rev-margem-pct');
+  if(mgEl) mgEl.textContent = mg > 0 ? (mg*100).toFixed(1).replace('.',',') + '%' : '0,0%';
+
+  // Resumo de equipe
+  const revEq = document.getElementById('rev-equipe-resumo');
+  if(revEq && qtdeTotal > 0) {
+    const rows = [];
+    document.querySelectorAll('#equipe-body tr').forEach(tr => {
+      const descEl = tr.querySelector('input[type=text]');
+      const nums   = tr.querySelectorAll('input[type=number]');
+      if(!descEl || nums.length < 2) return;
+      const nome = descEl.value || 'Perfil sem nome';
+      const qtde = parseFloat(nums[0].value) || 0;
+      const sal  = parseFloat(nums[1].value) || 0;
+      if(qtde > 0) rows.push({nome, qtde, sal});
+    });
+    if(rows.length) {
+      revEq.innerHTML = '<table><thead><tr><th>Perfil</th><th>Qtde</th><th>Salário base</th><th>Custo/mês</th></tr></thead><tbody>' +
+        rows.map(r => {
+          const enc2 = window._encargosRate || 0.697;
+          const p2   = getParams();
+          const vt2  = (p2.vt||35)*(p2.dias||22);
+          const vr2  = (p2.vr8||35)*(p2.dias||22);
+          const sau2 = (p2.saude||385)+(p2.odonto||21.21);
+          const vtLiq= vt2 - Math.min(r.sal*(p2.vtDesc||6)/100, vt2);
+          const cuUnit = r.sal*(1+enc2)+vtLiq+vr2+sau2;
+          return '<tr><td>'+r.nome+'</td><td class="num">'+r.qtde+'</td><td class="num">'+fmtBR(r.sal)+'</td><td class="num"><strong>'+fmtBR(cuUnit*r.qtde)+'</strong></td></tr>';
+        }).join('') +
+        '<tr class="total-row"><td colspan="2"><strong>Total — '+qtdeTotal+' profissionais</strong></td><td></td><td class="num"><strong>'+fmtBR(custoPes)+'</strong></td></tr>' +
+        '</tbody></table>';
+    }
+  } else if(revEq) {
+    const _p=document.createElement('p');
+    _p.style.cssText='color:var(--text3);font-size:13px;padding:8px 0';
+    _p.textContent='Nenhum perfil adicionado ainda. ';
+    const _b=document.createElement('button');
+    _b.className='btn btn-sm'; _b.textContent='Ir para Equipe';
+    _b.addEventListener('click',function(){irParaAba('equipe');});
+    _p.appendChild(_b); revEq.innerHTML=''; revEq.appendChild(_p);
+  }
+}
+
+// Adicionar botão "Revisão" no stepper — ao clicar no passo 5
+document.addEventListener('DOMContentLoaded', function() {
+  // Tornar os passos do stepper clicáveis
+  const steps = document.querySelectorAll('#page-nova .step');
+  const abaMap = ['', 'equipe', 'investimento', 'despesas', 'preco', 'revisao'];
+  steps.forEach(function(step, i) {
+    if(i === 0) return; // passo 1 = identificação, já foi
+    step.style.cursor = 'pointer';
+    step.addEventListener('click', function() {
+      if(i === 5) { preencherRevisao(); navTo('revisao', null); }
+      else irParaAba(abaMap[i]);
+    });
+  });
+
+  // Tornar as tabs do stepper da composição clicáveis também
+  // já estão com onclick
+});
+
+// Interceptar clique no passo 5 do stepper via delegação de eventos
+document.addEventListener('click', function(e) {
+  const step = e.target.closest('.step');
+  if(!step) return;
+  const stepper = step.closest('.stepper');
+  if(!stepper) return;
+  const steps = Array.from(stepper.querySelectorAll('.step'));
+  const idx = steps.indexOf(step);
+  if(idx === 4) { // 5º passo (index 4) = Revisão
+    preencherRevisao();
+    navTo('revisao', null);
+  }
+});
 </script>
 
 </body>
