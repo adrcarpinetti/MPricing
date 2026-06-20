@@ -1301,21 +1301,50 @@ function atualizarUI(user) {
 
 // ── MENU USUÁRIO ─────────────────────────────────────
 function toggleUserMenu() {
-  const ex = document.getElementById('user-dropdown');
+  var ex = document.getElementById('user-dropdown');
   if(ex){ ex.remove(); return; }
-  const sess = getSession();
-  const menu = document.createElement('div');
-  menu.id='user-dropdown';
-  menu.style.cssText='position:fixed;bottom:60px;left:12px;width:200px;background:#fff;border:1px solid #e2e0d8;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.15);z-index:8000;overflow:hidden';
-  menu.innerHTML=
-    '<div style="padding:12px 14px;border-bottom:1px solid #e2e0d8;background:#f9f8f8">'+
-      '<div style="font-size:12px;font-weight:600;color:#1a0a0d">'+(sess?.nome||'')+'</div>'+
-      '<div style="font-size:11px;color:#9c9a92">'+(sess?.username||'')+'</div></div>'+
-    '<button onclick="abrirTrocarSenha()" style="width:100%;padding:10px 14px;text-align:left;background:none;border:none;cursor:pointer;font-size:13px;font-family:inherit;display:flex;align-items:center;gap:8px"><i class="ti ti-lock" style="font-size:15px;color:#6b6860"></i> Alterar senha</button>'+
-    (sess?.perfil==='admin'?'<button onclick="abrirUsuarios()" style="width:100%;padding:10px 14px;text-align:left;background:none;border:none;cursor:pointer;font-size:13px;font-family:inherit;display:flex;align-items:center;gap:8px;border-top:1px solid #f1f0ec"><i class="ti ti-users" style="font-size:15px;color:#6b6860"></i> Gerenciar usuários</button>':'')+
-    '<button onclick="doLogout()" style="width:100%;padding:10px 14px;text-align:left;background:none;border:none;cursor:pointer;font-size:13px;color:#a00d24;font-family:inherit;display:flex;align-items:center;gap:8px;border-top:1px solid #f1f0ec"><i class="ti ti-logout" style="font-size:15px"></i> Sair</button>';
+  var sess = getSession();
+  var menu = document.createElement('div');
+  menu.id = 'user-dropdown';
+  menu.style.cssText = 'position:fixed;bottom:60px;left:12px;width:220px;background:#fff;border:1px solid #e2e0d8;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.15);z-index:8000;overflow:hidden';
+
+  // Cabeçalho
+  var header = document.createElement('div');
+  header.style.cssText = 'padding:12px 14px;border-bottom:1px solid #e2e0d8;background:#f9f8f8';
+  header.innerHTML = '<div style="font-size:12px;font-weight:600;color:#1a0a0d">'+(sess?sess.nome:'')+'</div><div style="font-size:11px;color:#9c9a92">'+(sess?sess.username:'')+'</div>';
+  menu.appendChild(header);
+
+  // Alterar senha
+  var btnSenha = document.createElement('button');
+  btnSenha.style.cssText = 'width:100%;padding:10px 14px;text-align:left;background:none;border:none;cursor:pointer;font-size:13px;font-family:inherit;display:flex;align-items:center;gap:8px';
+  btnSenha.innerHTML = '<i class="ti ti-lock" style="font-size:15px;color:#6b6860"></i> Alterar senha';
+  btnSenha.addEventListener('click', function(){ menu.remove(); abrirTrocarSenha(); });
+  menu.appendChild(btnSenha);
+
+  // Itens exclusivos do admin
+  if(sess && sess.perfil === 'admin') {
+    var btnUsuarios = document.createElement('button');
+    btnUsuarios.style.cssText = 'width:100%;padding:10px 14px;text-align:left;background:none;border:none;border-top:1px solid #f1f0ec;cursor:pointer;font-size:13px;font-family:inherit;display:flex;align-items:center;gap:8px';
+    btnUsuarios.innerHTML = '<i class="ti ti-users" style="font-size:15px;color:#6b6860"></i> Gerenciar usuários';
+    btnUsuarios.addEventListener('click', function(){ menu.remove(); abrirUsuarios(); });
+    menu.appendChild(btnUsuarios);
+
+    var btnReset = document.createElement('button');
+    btnReset.style.cssText = 'width:100%;padding:10px 14px;text-align:left;background:none;border:none;border-top:1px solid #f1f0ec;cursor:pointer;font-size:13px;font-family:inherit;display:flex;align-items:center;gap:8px;color:#a00d24';
+    btnReset.innerHTML = '<i class="ti ti-database-x" style="font-size:15px"></i> Limpar base de dados';
+    btnReset.addEventListener('click', function(){ menu.remove(); abrirResetBase(); });
+    menu.appendChild(btnReset);
+  }
+
+  // Sair
+  var btnSair = document.createElement('button');
+  btnSair.style.cssText = 'width:100%;padding:10px 14px;text-align:left;background:none;border:none;border-top:1px solid #f1f0ec;cursor:pointer;font-size:13px;color:#a00d24;font-family:inherit;display:flex;align-items:center;gap:8px';
+  btnSair.innerHTML = '<i class="ti ti-logout" style="font-size:15px"></i> Sair';
+  btnSair.addEventListener('click', function(){ doLogout(); });
+  menu.appendChild(btnSair);
+
   document.body.appendChild(menu);
-  setTimeout(()=>document.addEventListener('click',()=>menu?.remove(),{once:true}),50);
+  setTimeout(function(){ document.addEventListener('click', function rmMenu(){ menu.remove(); document.removeEventListener('click', rmMenu); }); }, 50);
 }
 
 function abrirTrocarSenha() {
