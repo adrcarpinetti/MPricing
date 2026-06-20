@@ -1240,6 +1240,16 @@ tr.total-row td{font-weight:600;background:var(--surface2);border-top:2px solid 
   </div>
 </div>
 
+<script>
+// LIMPEZA ÚNICA — remove este bloco após executar
+(function(){
+  var chaves = ['mpricing_propostas','mpricing_perfis','mpricing_hardware',
+    'mpricing_software','mpricing_insumos','mpricing_sindicatos',
+    'mpricing_params','mpricing_params_hist','mpricing_encargos'];
+  chaves.forEach(function(k){ localStorage.removeItem(k); });
+  console.log('MPricing: base de dados limpa em ' + new Date().toLocaleString('pt-BR'));
+})();
+</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
 // ═══════════════════════════════════════════════════════
