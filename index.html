@@ -1947,11 +1947,6 @@ function initCharts(){
 
 // ── INICIALIZAÇÃO ─────────────────────────────────────
 (function init(){
-  // RESET DIRETO — roda uma vez e é removido no próximo deploy
-  ['mpricing_propostas','mpricing_perfis','mpricing_hardware',
-   'mpricing_software','mpricing_insumos','mpricing_sindicatos',
-   'mpricing_params','mpricing_params_hist','mpricing_encargos'
-  ].forEach(function(k){ localStorage.removeItem(k); });
   initMaster();
   // Verificar "lembrar dispositivo"
   try{
