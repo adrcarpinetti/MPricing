@@ -787,29 +787,129 @@ tr.total-row td{font-weight:600;background:var(--surface2);border-top:2px solid 
 
 <!-- PERFIS -->
 <div class="page" id="page-perfis">
-  <div class="section-header"><h2>Perfis Profissionais</h2><button class="btn btn-primary"><i class="ti ti-plus"></i> Novo perfil</button></div>
+  <div class="section-header">
+    <div><h2>Perfis Profissionais</h2><p style="font-size:12px;color:var(--text3);margin-top:2px">Funções e faixas salariais de referência</p></div>
+    <button class="btn btn-primary" onclick="abrirFormPerfil()"><i class="ti ti-plus"></i> Novo perfil</button>
+  </div>
+  <div id="form-perfil" style="display:none;margin-bottom:16px">
+    <div class="card" style="border:2px solid #c8102e">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <h3 id="form-pf-titulo">Novo perfil</h3>
+        <button class="btn btn-sm btn-ghost" onclick="fecharFormPerfil()"><i class="ti ti-x"></i></button>
+      </div>
+      <input type="hidden" id="pf-edit-id">
+      <div class="form-row cols2">
+        <div class="form-group"><label>Código / Sigla <span style="color:#c8102e">*</span></label><input id="pf-codigo" type="text" placeholder="Ex: TECSUP-02" style="font-family:monospace"></div>
+        <div class="form-group"><label>Função / Cargo <span style="color:#c8102e">*</span></label><input id="pf-funcao" type="text" placeholder="Ex: Técnico de Suporte N1"></div>
+      </div>
+      <div class="form-row cols3">
+        <div class="form-group"><label>Salário mínimo (R$) <span style="color:#c8102e">*</span></label><input id="pf-sal-min" type="number" min="0" step="0.01" placeholder="0,00"></div>
+        <div class="form-group"><label>Salário máximo (R$)</label><input id="pf-sal-max" type="number" min="0" step="0.01" placeholder="0,00"></div>
+        <div class="form-group"><label>Salário referência (R$)</label><input id="pf-sal-ref" type="number" min="0" step="0.01" placeholder="Valor padrão p/ proposta"></div>
+      </div>
+      <div class="form-row cols3">
+        <div class="form-group"><label>Jornada</label>
+          <select id="pf-jornada"><option value="8h">8 horas</option><option value="6h">6 horas</option><option value="12x36">12x36</option><option value="outro">Outra</option></select>
+        </div>
+        <div class="form-group"><label>Sindicato referência</label>
+          <select id="pf-sindicato"></select>
+        </div>
+        <div class="form-group"><label>Nível</label>
+          <select id="pf-nivel">
+            <option value="junior">Júnior</option>
+            <option value="pleno">Pleno</option>
+            <option value="senior">Sênior</option>
+            <option value="especialista">Especialista</option>
+            <option value="lider">Líder/Coordenador</option>
+            <option value="gerente">Gerente</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row cols2">
+        <div class="form-group"><label>Área</label><input id="pf-area" type="text" placeholder="Ex: Suporte TI, Infraestrutura..."></div>
+        <div class="form-group"><label>Status</label>
+          <select id="pf-status"><option value="ativo">Ativo</option><option value="inativo">Inativo</option></select>
+        </div>
+      </div>
+      <div id="pf-erro" style="display:none;font-size:13px;color:var(--red);margin-bottom:10px"></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn" onclick="fecharFormPerfil()">Cancelar</button>
+        <button class="btn btn-primary" onclick="salvarPerfil()"><i class="ti ti-device-floppy"></i> Salvar</button>
+      </div>
+    </div>
+  </div>
   <div class="card" style="padding:0">
-    <table><thead><tr><th>Código</th><th>Função</th><th>Faixa Salarial</th><th>Sindicato</th><th>Jornada</th><th>Status</th></tr></thead>
-    <tbody>
-      <tr><td><code>TECSUP-02</code></td><td>Técnico Suporte remoto N1</td><td class="num">R$ 1.500 – R$ 2.000</td><td>SINDPD.RJ</td><td>8h</td><td><span class="badge badge-green">Ativo</span></td></tr>
-      <tr><td><code>TECMAN-02</code></td><td>Técnico Suporte presencial N2</td><td class="num">R$ 1.700 – R$ 2.200</td><td>SINDPD.RJ</td><td>8h</td><td><span class="badge badge-green">Ativo</span></td></tr>
-      <tr><td><code>ASUPCOMP-03</code></td><td>Analista Suporte Qualidade</td><td class="num">R$ 3.500 – R$ 5.000</td><td>SINDPD.RJ</td><td>8h</td><td><span class="badge badge-green">Ativo</span></td></tr>
-      <tr><td><code>GERSER</code></td><td>Gerente de Serviços TI</td><td class="num">R$ 7.000 – R$ 10.000</td><td>SINDPD.RJ</td><td>8h</td><td><span class="badge badge-green">Ativo</span></td></tr>
-    </tbody></table>
+    <table>
+      <thead><tr><th>Código</th><th>Função / Cargo</th><th>Nível</th><th>Faixa Salarial</th><th>Sal. Referência</th><th>Sindicato</th><th>Jornada</th><th>Status</th><th></th></tr></thead>
+      <tbody id="perfis-body"></tbody>
+    </table>
+    <div id="perfis-vazio" style="text-align:center;padding:32px;color:var(--text3)">
+      <i class="ti ti-users" style="font-size:28px;display:block;margin-bottom:8px"></i>
+      Nenhum perfil cadastrado. Clique em "+ Novo perfil" para adicionar.
+    </div>
   </div>
 </div>
 
 <!-- HARDWARE -->
 <div class="page" id="page-hardware">
-  <div class="section-header"><h2>Catálogo de Hardware</h2><button class="btn btn-primary"><i class="ti ti-plus"></i> Novo item</button></div>
+  <div class="section-header">
+    <div><h2>Catálogo de Hardware</h2><p style="font-size:12px;color:var(--text3);margin-top:2px">Equipamentos utilizados nas propostas</p></div>
+    <button class="btn btn-primary" onclick="abrirFormHardware()"><i class="ti ti-plus"></i> Novo item</button>
+  </div>
+  <div id="form-hardware" style="display:none;margin-bottom:16px">
+    <div class="card" style="border:2px solid #c8102e">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <h3 id="form-hw-titulo">Novo hardware</h3>
+        <button class="btn btn-sm btn-ghost" onclick="fecharFormHardware()"><i class="ti ti-x"></i></button>
+      </div>
+      <input type="hidden" id="hw-edit-id">
+      <div class="form-row cols2">
+        <div class="form-group" style="grid-column:1/-1"><label>Nome do item <span style="color:#c8102e">*</span></label><input id="hw-nome" type="text" placeholder="Ex: Notebook Dell Latitude 5540"></div>
+      </div>
+      <div class="form-row cols3">
+        <div class="form-group"><label>Categoria <span style="color:#c8102e">*</span></label>
+          <select id="hw-categoria">
+            <option value="notebook">Notebook</option>
+            <option value="desktop">Desktop</option>
+            <option value="monitor">Monitor</option>
+            <option value="periferico">Periférico</option>
+            <option value="headset">Headset</option>
+            <option value="celular">Celular / Smartphone</option>
+            <option value="storage">Armazenamento</option>
+            <option value="rede">Rede</option>
+            <option value="outro">Outro</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Fornecedor</label><input id="hw-fornecedor" type="text" placeholder="Ex: Dell, Lenovo..."></div>
+        <div class="form-group"><label>Status</label>
+          <select id="hw-status"><option value="ativo">Ativo</option><option value="inativo">Inativo</option></select>
+        </div>
+      </div>
+      <div class="form-row cols3">
+        <div class="form-group"><label>Valor unitário (R$) <span style="color:#c8102e">*</span></label><input id="hw-valor" type="number" min="0" step="0.01" placeholder="0,00"></div>
+        <div class="form-group"><label>Depreciação (meses) <span style="color:#c8102e">*</span></label><input id="hw-deprec" type="number" min="1" value="60" placeholder="60"></div>
+        <div class="form-group"><label>Validade do preço</label><input id="hw-validade" type="date"></div>
+      </div>
+      <div class="form-row cols2">
+        <div class="form-group"><label>Modelo / Especificação</label><input id="hw-modelo" type="text" placeholder="Ex: i5, 16GB RAM, 512GB SSD"></div>
+        <div class="form-group"><label>Observações</label><input id="hw-obs" type="text" placeholder="Informações adicionais"></div>
+      </div>
+      <div id="hw-erro" style="display:none;font-size:13px;color:var(--red);margin-bottom:10px"></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn" onclick="fecharFormHardware()">Cancelar</button>
+        <button class="btn btn-primary" onclick="salvarHardware()"><i class="ti ti-device-floppy"></i> Salvar</button>
+      </div>
+    </div>
+  </div>
   <div class="card" style="padding:0">
-    <table><thead><tr><th>Item</th><th>Categoria</th><th>Valor Padrão</th><th>Deprec. (meses)</th><th>Custo Mensal</th><th>Status</th></tr></thead>
-    <tbody>
-      <tr><td>Notebook</td><td><span class="badge badge-blue">Computador</span></td><td class="num">R$ 6.500</td><td class="num">60</td><td class="num">R$ 108,33</td><td><span class="badge badge-green">Ativo</span></td></tr>
-      <tr><td>Monitor 24"</td><td><span class="badge badge-gray">Periférico</span></td><td class="num">R$ 1.200</td><td class="num">60</td><td class="num">R$ 20,00</td><td><span class="badge badge-green">Ativo</span></td></tr>
-      <tr><td>Headset</td><td><span class="badge badge-gray">Periférico</span></td><td class="num">R$ 150</td><td class="num">36</td><td class="num">R$ 4,17</td><td><span class="badge badge-green">Ativo</span></td></tr>
-      <tr><td>Celular</td><td><span class="badge badge-amber">Móvel</span></td><td class="num">R$ 1.500</td><td class="num">60</td><td class="num">R$ 25,00</td><td><span class="badge badge-green">Ativo</span></td></tr>
-    </tbody></table>
+    <table>
+      <thead><tr><th>Item</th><th>Categoria</th><th>Fornecedor</th><th>Valor Unit.</th><th>Deprec.</th><th>Custo Mensal</th><th>Validade</th><th>Status</th><th></th></tr></thead>
+      <tbody id="hardware-body"></tbody>
+    </table>
+    <div id="hardware-vazio" style="text-align:center;padding:32px;color:var(--text3)">
+      <i class="ti ti-device-laptop" style="font-size:28px;display:block;margin-bottom:8px"></i>
+      Nenhum hardware cadastrado. Clique em "+ Novo item" para adicionar.
+    </div>
   </div>
 </div>
 
@@ -1339,6 +1439,8 @@ function navTo(page, el) {
   if(page==='sindicatos') setTimeout(carregarSindicatos, 80);
   if(page==='software')   setTimeout(renderSoftware,     80);
   if(page==='insumos')    setTimeout(renderInsumos,       80);
+  if(page==='hardware')   setTimeout(renderHardware,      80);
+  if(page==='perfis')     setTimeout(renderPerfis,        80);
 }
 
 function novaPropostaFlow(el) {
@@ -2679,5 +2781,302 @@ document.addEventListener('click', function(e) {
 
 
 
+
+<script>
+// ═══════════════════════════════════════════════
+//  MPricing — Hardware e Perfis Profissionais
+// ═══════════════════════════════════════════════
+
+var HW_KEY   = 'mpricing_hardware';
+var PERF_KEY = 'mpricing_perfis';
+
+var HW_DEFAULT = [
+  {id:'hw1',nome:'Notebook',categoria:'notebook',fornecedor:'',valor:6500,deprec:60,validade:'',modelo:'i5 16GB 512SSD',obs:'',status:'ativo'},
+  {id:'hw2',nome:'Desktop',categoria:'desktop',fornecedor:'',valor:3500,deprec:60,validade:'',modelo:'',obs:'',status:'ativo'},
+  {id:'hw3',nome:'Monitor 24"',categoria:'monitor',fornecedor:'',valor:1200,deprec:60,validade:'',modelo:'Full HD',obs:'',status:'ativo'},
+  {id:'hw4',nome:'Headset',categoria:'headset',fornecedor:'',valor:150,deprec:36,validade:'',modelo:'',obs:'',status:'ativo'},
+  {id:'hw5',nome:'Celular / Smartphone',categoria:'celular',fornecedor:'',valor:1500,deprec:60,validade:'',modelo:'',obs:'',status:'ativo'},
+  {id:'hw6',nome:'HD Externo 1Tb',categoria:'storage',fornecedor:'',valor:500,deprec:12,validade:'',modelo:'',obs:'',status:'ativo'},
+  {id:'hw7',nome:'Maleta de Ferramentas',categoria:'outro',fornecedor:'',valor:350,deprec:12,validade:'',modelo:'',obs:'',status:'ativo'},
+];
+
+var PERF_DEFAULT = [
+  {id:'p1',codigo:'TECSUP-02',funcao:'Técnico de Suporte Remoto N1',nivel:'pleno',salMin:1500,salMax:2000,salRef:1621,jornada:'8h',sindicato:'SINDPD.RJ — Rio de Janeiro/RJ',area:'Suporte TI',status:'ativo'},
+  {id:'p2',codigo:'TECMAN-02',funcao:'Técnico de Suporte Presencial N2',nivel:'pleno',salMin:1700,salMax:2200,salRef:1785,jornada:'8h',sindicato:'SINDPD.RJ — Rio de Janeiro/RJ',area:'Suporte TI',status:'ativo'},
+  {id:'p3',codigo:'ASUPCOMP-03',funcao:'Analista de Suporte Qualidade e Processos',nivel:'senior',salMin:3500,salMax:5000,salRef:3500,jornada:'8h',sindicato:'SINDPD.RJ — Rio de Janeiro/RJ',area:'Qualidade',status:'ativo'},
+  {id:'p4',codigo:'LIDATD',funcao:'Líder Técnico N1/N2',nivel:'lider',salMin:4000,salMax:6000,salRef:4000,jornada:'8h',sindicato:'SINDPD.RJ — Rio de Janeiro/RJ',area:'Suporte TI',status:'ativo'},
+  {id:'p5',codigo:'GERSER',funcao:'Gerente de Serviços de TI',nivel:'gerente',salMin:7000,salMax:10000,salRef:8247,jornada:'8h',sindicato:'SINDPD.RJ — Rio de Janeiro/RJ',area:'Gestão',status:'ativo'},
+];
+
+var HW_CATEG = {notebook:'Notebook',desktop:'Desktop',monitor:'Monitor',periferico:'Periférico',
+                headset:'Headset',celular:'Celular',storage:'Armazenamento',rede:'Rede',outro:'Outro'};
+var HW_BADGE = {notebook:'badge-blue',desktop:'badge-blue',monitor:'badge-gray',periferico:'badge-gray',
+                headset:'badge-gray',celular:'badge-amber',storage:'badge-gray',rede:'badge-green',outro:'badge-gray'};
+var NIVEL_LABEL = {junior:'Júnior',pleno:'Pleno',senior:'Sênior',especialista:'Especialista',lider:'Líder',gerente:'Gerente'};
+
+function getHardwares() { try { var d=JSON.parse(localStorage.getItem(HW_KEY));   return (d&&d.length)?d:HW_DEFAULT.slice();   } catch(e){ return HW_DEFAULT.slice(); } }
+function saveHardwares(d){ localStorage.setItem(HW_KEY,   JSON.stringify(d)); }
+function getPerfis()     { try { var d=JSON.parse(localStorage.getItem(PERF_KEY)); return (d&&d.length)?d:PERF_DEFAULT.slice(); } catch(e){ return PERF_DEFAULT.slice(); } }
+function savePerfis(d)   { localStorage.setItem(PERF_KEY, JSON.stringify(d)); }
+
+var fmtR = function(v){ return 'R$ '+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); };
+
+// ── HARDWARE ─────────────────────────────────
+function abrirFormHardware() {
+  document.getElementById('form-hw-titulo').textContent = 'Novo hardware';
+  document.getElementById('hw-edit-id').value = '';
+  ['hw-nome','hw-fornecedor','hw-modelo','hw-obs','hw-validade'].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.value='';
+  });
+  document.getElementById('hw-valor').value   = '';
+  document.getElementById('hw-deprec').value  = 60;
+  document.getElementById('hw-categoria').value = 'notebook';
+  document.getElementById('hw-status').value  = 'ativo';
+  document.getElementById('hw-erro').style.display = 'none';
+  document.getElementById('form-hardware').style.display = 'block';
+  document.getElementById('hw-nome').focus();
+}
+
+function fecharFormHardware() {
+  document.getElementById('form-hardware').style.display = 'none';
+}
+
+function salvarHardware() {
+  var nome  = (document.getElementById('hw-nome').value||'').trim();
+  var valor = parseFloat(document.getElementById('hw-valor').value);
+  var errEl = document.getElementById('hw-erro');
+  if(!nome)        { errEl.textContent='Informe o nome do item.'; errEl.style.display='block'; return; }
+  if(!valor||valor<0){ errEl.textContent='Informe um valor válido.'; errEl.style.display='block'; return; }
+  var editId = document.getElementById('hw-edit-id').value;
+  var lista  = getHardwares();
+  var item = {
+    id:         editId||'hw_'+Date.now(),
+    nome:       nome,
+    categoria:  document.getElementById('hw-categoria').value,
+    fornecedor: (document.getElementById('hw-fornecedor').value||'').trim(),
+    valor:      valor,
+    deprec:     parseInt(document.getElementById('hw-deprec').value)||60,
+    validade:   document.getElementById('hw-validade').value||'',
+    modelo:     (document.getElementById('hw-modelo').value||'').trim(),
+    obs:        (document.getElementById('hw-obs').value||'').trim(),
+    status:     document.getElementById('hw-status').value,
+  };
+  if(editId) {
+    var idx=lista.findIndex(function(x){return x.id===editId;});
+    if(idx>-1) lista[idx]=item; else lista.push(item);
+  } else { lista.push(item); }
+  saveHardwares(lista);
+  fecharFormHardware();
+  renderHardware();
+}
+
+function editarHardware(id) {
+  var item = getHardwares().find(function(x){return x.id===id;});
+  if(!item) return;
+  document.getElementById('form-hw-titulo').textContent = 'Editar — '+item.nome;
+  document.getElementById('hw-edit-id').value    = item.id;
+  document.getElementById('hw-nome').value       = item.nome;
+  document.getElementById('hw-categoria').value  = item.categoria;
+  document.getElementById('hw-fornecedor').value = item.fornecedor||'';
+  document.getElementById('hw-valor').value      = item.valor;
+  document.getElementById('hw-deprec').value     = item.deprec;
+  document.getElementById('hw-validade').value   = item.validade||'';
+  document.getElementById('hw-modelo').value     = item.modelo||'';
+  document.getElementById('hw-obs').value        = item.obs||'';
+  document.getElementById('hw-status').value     = item.status;
+  document.getElementById('hw-erro').style.display = 'none';
+  document.getElementById('form-hardware').style.display = 'block';
+  document.getElementById('hw-nome').focus();
+}
+
+function excluirHardware(id) {
+  if(!confirm('Excluir este item do catálogo?')) return;
+  saveHardwares(getHardwares().filter(function(x){return x.id!==id;}));
+  renderHardware();
+}
+
+function renderHardware() {
+  var lista = getHardwares();
+  var tbody = document.getElementById('hardware-body');
+  var vazio = document.getElementById('hardware-vazio');
+  if(!tbody) return;
+  tbody.innerHTML = '';
+  if(!lista.length){ if(vazio) vazio.style.display='block'; return; }
+  if(vazio) vazio.style.display='none';
+  lista.forEach(function(item) {
+    var cm  = item.valor / item.deprec;
+    var bc  = HW_BADGE[item.categoria]||'badge-gray';
+    var cat = HW_CATEG[item.categoria]||item.categoria;
+    var val = item.validade ? new Date(item.validade+'T00:00:00').toLocaleDateString('pt-BR') : '—';
+    var tr  = document.createElement('tr');
+    var nome_cell = item.nome + (item.modelo ? '<br><span style="font-size:11px;color:var(--text3)">'+item.modelo+'</span>' : '');
+    tr.innerHTML =
+      '<td>'+nome_cell+'</td>'+
+      '<td><span class="badge '+bc+'">'+cat+'</span></td>'+
+      '<td style="font-size:13px">'+(item.fornecedor||'—')+'</td>'+
+      '<td class="num">'+fmtR(item.valor)+'</td>'+
+      '<td class="num">'+item.deprec+' meses</td>'+
+      '<td class="num"><strong>'+fmtR(cm)+'/mês</strong></td>'+
+      '<td style="font-size:12px;color:var(--text3)">'+val+'</td>'+
+      '<td><span class="badge '+(item.status==='ativo'?'badge-green':'badge-gray')+'">'+(item.status==='ativo'?'Ativo':'Inativo')+'</span></td>'+
+      '<td><div class="td-action"></div></td>';
+    var acts = tr.querySelector('.td-action');
+    var btnE = document.createElement('button');
+    btnE.className='btn btn-sm btn-ghost'; btnE.title='Editar';
+    btnE.innerHTML='<i class="ti ti-edit"></i>';
+    btnE.addEventListener('click', function(){ editarHardware(item.id); });
+    var btnD = document.createElement('button');
+    btnD.className='btn btn-sm btn-ghost'; btnD.style.color='var(--red)'; btnD.title='Excluir';
+    btnD.innerHTML='<i class="ti ti-trash"></i>';
+    btnD.addEventListener('click', function(){ excluirHardware(item.id); });
+    acts.appendChild(btnE); acts.appendChild(btnD);
+    tbody.appendChild(tr);
+  });
+}
+
+// ── PERFIS ────────────────────────────────────
+function abrirFormPerfil() {
+  document.getElementById('form-pf-titulo').textContent = 'Novo perfil';
+  document.getElementById('pf-edit-id').value = '';
+  ['pf-codigo','pf-funcao','pf-area'].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.value='';
+  });
+  ['pf-sal-min','pf-sal-max','pf-sal-ref'].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.value='';
+  });
+  document.getElementById('pf-jornada').value = '8h';
+  document.getElementById('pf-nivel').value   = 'pleno';
+  document.getElementById('pf-status').value  = 'ativo';
+  document.getElementById('pf-erro').style.display = 'none';
+  // Popular select de sindicatos
+  popularSindicatosSelect('pf-sindicato');
+  document.getElementById('form-perfil').style.display = 'block';
+  document.getElementById('pf-codigo').focus();
+}
+
+function fecharFormPerfil() {
+  document.getElementById('form-perfil').style.display = 'none';
+}
+
+function popularSindicatosSelect(selectId) {
+  var sel = document.getElementById(selectId);
+  if(!sel) return;
+  var current = sel.value;
+  sel.innerHTML = '';
+  var sinds = [];
+  try { sinds = getSindicatos(); } catch(e) {
+    sinds = [
+      {nome:'SINDPD.RJ — Rio de Janeiro/RJ'},
+      {nome:'SINDPD/ES — Vitória/ES'},
+      {nome:'PC × SINTELMARK — Rio de Janeiro/RJ'}
+    ];
+  }
+  sinds.forEach(function(s) {
+    var opt = document.createElement('option');
+    opt.value = s.nome; opt.textContent = s.nome;
+    sel.appendChild(opt);
+  });
+  if(current) sel.value = current;
+}
+
+function salvarPerfil() {
+  var codigo = (document.getElementById('pf-codigo').value||'').trim().toUpperCase();
+  var funcao = (document.getElementById('pf-funcao').value||'').trim();
+  var salMin = parseFloat(document.getElementById('pf-sal-min').value)||0;
+  var errEl  = document.getElementById('pf-erro');
+  if(!codigo){ errEl.textContent='Informe o código/sigla.'; errEl.style.display='block'; return; }
+  if(!funcao){ errEl.textContent='Informe a função/cargo.'; errEl.style.display='block'; return; }
+  if(!salMin){ errEl.textContent='Informe o salário mínimo.'; errEl.style.display='block'; return; }
+  var editId = document.getElementById('pf-edit-id').value;
+  var lista  = getPerfis();
+  if(!editId && lista.find(function(x){return x.codigo===codigo;})) {
+    errEl.textContent='Código já cadastrado.'; errEl.style.display='block'; return;
+  }
+  var item = {
+    id:        editId||'pf_'+Date.now(),
+    codigo:    codigo,
+    funcao:    funcao,
+    nivel:     document.getElementById('pf-nivel').value,
+    salMin:    salMin,
+    salMax:    parseFloat(document.getElementById('pf-sal-max').value)||0,
+    salRef:    parseFloat(document.getElementById('pf-sal-ref').value)||salMin,
+    jornada:   document.getElementById('pf-jornada').value,
+    sindicato: document.getElementById('pf-sindicato').value||'',
+    area:      (document.getElementById('pf-area').value||'').trim(),
+    status:    document.getElementById('pf-status').value,
+  };
+  if(editId) {
+    var idx=lista.findIndex(function(x){return x.id===editId;});
+    if(idx>-1) lista[idx]=item; else lista.push(item);
+  } else { lista.push(item); }
+  savePerfis(lista);
+  fecharFormPerfil();
+  renderPerfis();
+}
+
+function editarPerfil(id) {
+  var item = getPerfis().find(function(x){return x.id===id;});
+  if(!item) return;
+  popularSindicatosSelect('pf-sindicato');
+  document.getElementById('form-pf-titulo').textContent = 'Editar — '+item.codigo;
+  document.getElementById('pf-edit-id').value  = item.id;
+  document.getElementById('pf-codigo').value   = item.codigo;
+  document.getElementById('pf-funcao').value   = item.funcao;
+  document.getElementById('pf-nivel').value    = item.nivel;
+  document.getElementById('pf-sal-min').value  = item.salMin;
+  document.getElementById('pf-sal-max').value  = item.salMax||'';
+  document.getElementById('pf-sal-ref').value  = item.salRef||'';
+  document.getElementById('pf-jornada').value  = item.jornada;
+  document.getElementById('pf-sindicato').value= item.sindicato||'';
+  document.getElementById('pf-area').value     = item.area||'';
+  document.getElementById('pf-status').value   = item.status;
+  document.getElementById('pf-erro').style.display = 'none';
+  document.getElementById('form-perfil').style.display = 'block';
+  document.getElementById('pf-codigo').focus();
+}
+
+function excluirPerfil(id) {
+  if(!confirm('Excluir este perfil do catálogo?')) return;
+  savePerfis(getPerfis().filter(function(x){return x.id!==id;}));
+  renderPerfis();
+}
+
+function renderPerfis() {
+  var lista = getPerfis();
+  var tbody = document.getElementById('perfis-body');
+  var vazio = document.getElementById('perfis-vazio');
+  if(!tbody) return;
+  tbody.innerHTML = '';
+  if(!lista.length){ if(vazio) vazio.style.display='block'; return; }
+  if(vazio) vazio.style.display='none';
+  lista.forEach(function(item) {
+    var faixaStr = fmtR(item.salMin) + (item.salMax ? ' – ' + fmtR(item.salMax) : '');
+    var nivelLabel = NIVEL_LABEL[item.nivel]||item.nivel;
+    var tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td><code style="background:var(--surface2);padding:2px 6px;border-radius:4px;font-size:12px">'+item.codigo+'</code></td>'+
+      '<td>'+(item.funcao)+(item.area?'<br><span style="font-size:11px;color:var(--text3)">'+item.area+'</span>':'')+'</td>'+
+      '<td><span class="badge badge-gray">'+nivelLabel+'</span></td>'+
+      '<td class="num" style="font-size:12px">'+faixaStr+'</td>'+
+      '<td class="num"><strong>'+fmtR(item.salRef||item.salMin)+'</strong></td>'+
+      '<td style="font-size:12px">'+(item.sindicato||'—')+'</td>'+
+      '<td class="num">'+item.jornada+'</td>'+
+      '<td><span class="badge '+(item.status==='ativo'?'badge-green':'badge-gray')+'">'+(item.status==='ativo'?'Ativo':'Inativo')+'</span></td>'+
+      '<td><div class="td-action"></div></td>';
+    var acts = tr.querySelector('.td-action');
+    var btnE = document.createElement('button');
+    btnE.className='btn btn-sm btn-ghost'; btnE.title='Editar';
+    btnE.innerHTML='<i class="ti ti-edit"></i>';
+    btnE.addEventListener('click', function(){ editarPerfil(item.id); });
+    var btnD = document.createElement('button');
+    btnD.className='btn btn-sm btn-ghost'; btnD.style.color='var(--red)'; btnD.title='Excluir';
+    btnD.innerHTML='<i class="ti ti-trash"></i>';
+    btnD.addEventListener('click', function(){ excluirPerfil(item.id); });
+    acts.appendChild(btnE); acts.appendChild(btnD);
+    tbody.appendChild(tr);
+  });
+}
+
+</script>
 </body>
 </html>
