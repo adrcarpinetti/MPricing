@@ -1947,15 +1947,11 @@ function initCharts(){
 
 // ── INICIALIZAÇÃO ─────────────────────────────────────
 (function init(){
-  // AUTO-RESET: limpar dados de teste se flag estiver ativa
-  if(localStorage.getItem('mpricing_do_reset')==='1'){
-    ['mpricing_propostas','mpricing_perfis','mpricing_hardware',
-     'mpricing_software','mpricing_insumos','mpricing_sindicatos',
-     'mpricing_params','mpricing_params_hist','mpricing_encargos'
-    ].forEach(function(k){ localStorage.removeItem(k); });
-    localStorage.removeItem('mpricing_do_reset');
-    console.log('MPricing: base limpa com sucesso');
-  }
+  // RESET DIRETO — roda uma vez e é removido no próximo deploy
+  ['mpricing_propostas','mpricing_perfis','mpricing_hardware',
+   'mpricing_software','mpricing_insumos','mpricing_sindicatos',
+   'mpricing_params','mpricing_params_hist','mpricing_encargos'
+  ].forEach(function(k){ localStorage.removeItem(k); });
   initMaster();
   // Verificar "lembrar dispositivo"
   try{
