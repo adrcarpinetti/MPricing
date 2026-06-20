@@ -1947,6 +1947,15 @@ function initCharts(){
 
 // ── INICIALIZAÇÃO ─────────────────────────────────────
 (function init(){
+  // AUTO-RESET: limpar dados de teste se flag estiver ativa
+  if(localStorage.getItem('mpricing_do_reset')==='1'){
+    ['mpricing_propostas','mpricing_perfis','mpricing_hardware',
+     'mpricing_software','mpricing_insumos','mpricing_sindicatos',
+     'mpricing_params','mpricing_params_hist','mpricing_encargos'
+    ].forEach(function(k){ localStorage.removeItem(k); });
+    localStorage.removeItem('mpricing_do_reset');
+    console.log('MPricing: base limpa com sucesso');
+  }
   initMaster();
   // Verificar "lembrar dispositivo"
   try{
@@ -3159,35 +3168,25 @@ function renderPerfis() {
 
 <script>
 function limparModulo(chave, nome, btnEl) {
-  // Sem confirm — botão vira confirmação visual
   if(btnEl && btnEl.dataset.confirmed !== '1') {
+    var orig = btnEl.innerHTML;
     btnEl.dataset.confirmed = '1';
-    btnEl.style.background = 'var(--red)';
-    btnEl.style.color = '#fff';
-    btnEl.style.borderColor = 'var(--red)';
-    btnEl.textContent = 'Clique novamente para confirmar';
-    setTimeout(function(){ 
-      if(btnEl.dataset.confirmed === '1') {
-        btnEl.dataset.confirmed = '0';
-        btnEl.style.background = '';
-        btnEl.style.color = '';
-        btnEl.style.borderColor = '';
-        btnEl.innerHTML = btnEl._originalHtml || btnEl.textContent;
+    btnEl.style.cssText = 'background:#c8102e;color:#fff;border-color:#c8102e;justify-content:flex-start;gap:8px';
+    btnEl.textContent = 'Confirmar: apagar ' + nome + '?';
+    setTimeout(function(){
+      if(btnEl.dataset.confirmed==='1'){
+        btnEl.dataset.confirmed='0';
+        btnEl.style.cssText='justify-content:flex-start;gap:8px';
+        btnEl.innerHTML=orig;
       }
     }, 3000);
     return;
   }
-  // Segunda vez — executar
+  // Apagar direto
   localStorage.removeItem(chave);
-  if(chave === 'mpricing_params') localStorage.removeItem('mpricing_params_hist');
-  // Mostrar feedback sem alert
-  if(btnEl) {
-    btnEl.style.background = '#1a6b3a';
-    btnEl.style.color = '#fff';
-    btnEl.textContent = nome + ' apagado!';
-  }
-  // Recarregar após 1.5s
-  setTimeout(function(){ window.location.href = window.location.href; }, 1500);
+  if(chave==='mpricing_params') localStorage.removeItem('mpricing_params_hist');
+  if(btnEl){ btnEl.style.background='#1a6b3a'; btnEl.style.color='#fff'; btnEl.textContent='Apagado!'; }
+  setTimeout(function(){ window.location.href=window.location.href; }, 1000);
 }
 
 function limparTudo() {
@@ -3195,30 +3194,20 @@ function limparTudo() {
   if(btn && btn.dataset.confirmed !== '1') {
     btn.dataset.confirmed = '1';
     btn.style.background = '#7a0000';
-    btn.textContent = 'Clique novamente para CONFIRMAR';
+    btn.textContent = 'Confirmar TUDO?';
     setTimeout(function(){
-      if(btn.dataset.confirmed === '1') {
-        btn.dataset.confirmed = '0';
-        btn.style.background = 'var(--red)';
-        btn.innerHTML = '<i class="ti ti-trash"></i> Apagar TUDO';
+      if(btn.dataset.confirmed==='1'){
+        btn.dataset.confirmed='0';
+        btn.style.background='var(--red)';
+        btn.innerHTML='<i class="ti ti-trash"></i> Apagar TUDO';
       }
     }, 3000);
     return;
   }
-  // Executar limpeza
-  ['mpricing_propostas','mpricing_perfis','mpricing_hardware','mpricing_software',
-   'mpricing_insumos','mpricing_sindicatos','mpricing_params','mpricing_params_hist',
-   'mpricing_encargos'].forEach(function(k){ localStorage.removeItem(k); });
-  if(btn) { btn.style.background='#1a6b3a'; btn.textContent='Tudo apagado!'; }
-  setTimeout(function(){ window.location.href = window.location.href; }, 1500);
+  // Setar flag e recarregar — o init() vai limpar
+  localStorage.setItem('mpricing_do_reset','1');
+  window.location.href = window.location.href;
 }
-
-// Guardar HTML original dos botões para restore
-document.addEventListener('DOMContentLoaded', function(){
-  document.querySelectorAll('#page-reset .btn[onclick*=limparModulo]').forEach(function(b){
-    b._originalHtml = b.innerHTML;
-  });
-});
 </script>
 
 </body>
