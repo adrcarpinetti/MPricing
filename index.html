@@ -1332,7 +1332,7 @@ function toggleUserMenu() {
     var btnReset = document.createElement('button');
     btnReset.style.cssText = 'width:100%;padding:10px 14px;text-align:left;background:none;border:none;border-top:1px solid #f1f0ec;cursor:pointer;font-size:13px;font-family:inherit;display:flex;align-items:center;gap:8px;color:#a00d24';
     btnReset.innerHTML = '<i class="ti ti-database-x" style="font-size:15px"></i> Limpar base de dados';
-    btnReset.addEventListener('click', function(){ menu.remove(); abrirResetBase(); });
+    btnReset.addEventListener('click', function(e){ e.stopPropagation(); menu.remove(); abrirResetBase(e); });
     menu.appendChild(btnReset);
   }
 
@@ -1344,7 +1344,7 @@ function toggleUserMenu() {
   menu.appendChild(btnSair);
 
   document.body.appendChild(menu);
-  setTimeout(function(){ document.addEventListener('click', function rmMenu(){ menu.remove(); document.removeEventListener('click', rmMenu); }); }, 50);
+  setTimeout(function(){ document.addEventListener('click', function rmMenu(e){ if(document.getElementById('user-dropdown')) { menu.remove(); } document.removeEventListener('click', rmMenu); }); }, 200);
 }
 
 function abrirTrocarSenha() {
@@ -3174,18 +3174,32 @@ function renderPerfis() {
 //  MPricing — Reset / Limpeza de base
 // ═══════════════════════════════════════════════
 
-function abrirResetBase() {
-  document.getElementById('user-dropdown')?.remove();
-  document.getElementById('modal-reset-base').style.display = 'flex';
+function abrirResetBase(e) {
+  if(e) e.stopPropagation();
+  // Garantir que o dropdown sumiu antes de mostrar o modal
+  var drop = document.getElementById('user-dropdown');
+  if(drop) drop.remove();
+  setTimeout(function() {
+    var modal = document.getElementById('modal-reset-base');
+    if(modal) modal.style.display = 'flex';
+  }, 50);
 }
 
 function fecharResetBase() {
-  document.getElementById('modal-reset-base').style.display = 'none';
-  // Desmarcar todos os checkboxes
+  var modal = document.getElementById('modal-reset-base');
+  if(modal) modal.style.display = 'none';
   document.querySelectorAll('#modal-reset-base input[type=checkbox]').forEach(function(c){
     c.checked = false;
   });
 }
+
+// Fechar modal ao clicar no overlay
+document.addEventListener('click', function(e) {
+  var modal = document.getElementById('modal-reset-base');
+  if(modal && modal.style.display === 'flex' && e.target === modal) {
+    fecharResetBase();
+  }
+});
 
 function executarReset() {
   var checks = {
